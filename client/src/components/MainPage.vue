@@ -1,15 +1,7 @@
 
 <template>
   <div class="container">
-    <h1>Latest Plugs</h1>
-    <!-- <form class="create-plug">
-      <label for="create-plug">Post a plug</label>
-      <input type="text" id="title" v-model="title">
-      <input type="text" id="category" v-model="category">
-      <input id="fileupload" type="file" v-on:change="FileUpload()">
-      <input type="text" id="details" v-model="details">
-      <button v-on:click="submitPlug"></button>
-    </form>-->
+    <h1>Create a new plug</h1>
     <v-form ref="form" v-model="valid" lazy-validation>
       <v-text-field
         v-model="title"
@@ -20,7 +12,7 @@
         label="Title"
         required
       ></v-text-field>
-      <v-text-field v-model="details" ref="details" name="details" label="Details" required></v-text-field>
+      <v-text-field v-model="details" ref="details" name="details" placeholder="A description of your project" label="Details" required></v-text-field>
       <v-select
         v-model="select"
         ref="category"
@@ -30,24 +22,13 @@
         required
       ></v-select>
       <v-btn color="primary" @click="$refs.plug.click()">Choose files</v-btn>
-      <input v-show="false" id="plug" ref="plug" type="file" name="plug" @change="fileChanged" >
+      <input v-show="false" id="plug" ref="plug" type="file" name="plug" @change="fileChanged">
       <v-btn :disabled="!valid" color="success" @click="submitPlug">Post plug</v-btn>
       <v-btn color="error" @click="reset">Reset Form</v-btn>
     </v-form>
     <hr>
     <p class="error" v-if="error">{{error}}</p>
-    <div class="plugs-container">
-      <div
-        class="post"
-        v-for="(plug, index) in plug"
-        v-bind:item="plug"
-        v-bind:index="index"
-        v-bind:key="plug._id"
-      >
-        {{`${plug.createdAt.getDate()}/${plug.createdAt.getMonth()}/${plug.createdAt.getFullYear()}`}}
-        <p class="text">{{plug.text}}</p>
-      </div>
-    </div>
+    
   </div>
 </template>
 
@@ -60,7 +41,9 @@ export default {
   name: "PlugComponent",
   data() {
     return {
-      plug: '',
+      plug: "",
+      show: false,
+      plugs: [],
       valid: true,
       select: null,
       items: ["Graphics Design", "Art", "Music", "Programming"],
@@ -83,11 +66,10 @@ export default {
     },
     fileChanged() {
       this.file = this.$refs.plug.files[0];
-      console.log(this.file);
     },
     reset() {
       this.$refs.form.reset();
-    },
+    }
   },
   components: {
     "upload-btn": UploadButton
@@ -95,9 +77,11 @@ export default {
 
   async created() {
     try {
-      this.posts = await PlugService.getPlugs;
+      this.plugs = await PlugService.getPlugs();
     } catch (err) {
       this.error = err.message;
+    } finally {
+      console.log(this.plug[0]);
     }
   }
 };
