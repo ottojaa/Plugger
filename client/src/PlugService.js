@@ -21,9 +21,19 @@ class PlugService {
     })
   }
   static insertPlug (plug) {
-    return axios.post(url, {
-      plug
+    console.log(plug, 'HHHAAAAA????')
+    return axios({
+      method: 'post',
+      url: url,
+      data: plug,
+      headers: { 'Content-Type': 'multipart/form-data' }
     })
+      .then(function (response) {
+        console.log(response)
+      })
+      .catch(function (response) {
+        console.log(response)
+      })
   }
 
   static deletePlug (id) {

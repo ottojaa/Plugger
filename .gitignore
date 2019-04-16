@@ -1,5 +1,8 @@
 .pem
 *.pem
+.env
+uploads/*
+!uploads/.gitkeep
 
 .DS_Store
 node_modules

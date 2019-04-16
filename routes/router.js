@@ -29,8 +29,7 @@ router.get('/upload', (req, res) => {
 });
 
 router.post('/', upload.single('plug'), async (req, res) => {
-
-    /* await createThumbnails(req.file.path, req.file.originalname); */
+    
     const post = new Post({
         createdAt: moment(),
         title: req.body.title,

@@ -16,18 +16,18 @@
     </v-toolbar>
 
     <v-content>
-      <MainPage/>
+      <HelloWorld/>
     </v-content>
   </v-app>
 </template>
 
 <script>
-import MainPage from './components/MainPage'
+import HelloWorld from './components/HelloWorld'
 
 export default {
   name: 'App',
   components: {
-    MainPage
+    HelloWorld
   },
   data () {
     return {

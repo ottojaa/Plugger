@@ -6,6 +6,7 @@ const https = require('https');
 const http = require('http');
 const path = require('path');
 const fs = require('fs');
+const cors = require('cors');
 const router = require('./routes/router.js');
 
 
@@ -18,11 +19,11 @@ const options = {
 };
 
 const app = express();
-
-app.use(bodyParser.urlencoded({
-    extended: false
-}));
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({
+    extended: true
+}));
+app.use(cors());
 app.use(express.static(__dirname + '/public'));
 app.use(express.static(__dirname + '/public/small'));
 app.use(express.static('uploads'));
@@ -36,11 +37,10 @@ mongoose.connect(`mongodb://${process.env.DB_USER}:${process.env.DB_PASS}@${proc
     .catch((e) => {
         console.log('Connection to db failed because:', e);
     });
-
 app.use('/', router);  
 
 function appListen() {
-    https.createServer(options, app).listen(5000);
+    https.createServer(options, app).listen(3000);
     http.createServer((req, res) => {
         res.writeHead(301, { 'Location': 'https://localhost:3000' + req.url });
         res.end();

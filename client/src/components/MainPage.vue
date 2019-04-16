@@ -1,22 +1,50 @@
+
 <template>
   <div class="container">
     <h1>Latest Plugs</h1>
-    <form class="create-plug" enctype="multipart/form-data">
+    <!-- <form class="create-plug">
       <label for="create-plug">Post a plug</label>
       <input type="text" id="title" v-model="title">
       <input type="text" id="category" v-model="category">
-      <input id="fileupload" type="file" v-on:change="plug" ref="fileInput" />
-    </form>
+      <input id="fileupload" type="file" v-on:change="FileUpload()">
+      <input type="text" id="details" v-model="details">
+      <button v-on:click="submitPlug"></button>
+    </form>-->
+    <v-form ref="form" v-model="valid" lazy-validation>
+      <v-text-field
+        v-model="title"
+        ref="title"
+        name="title"
+        :counter="30"
+        :rules="[v => !!v || 'Title is required', v => (v && v.length <= 30) || 'Title must be less than 30 characters']"
+        label="Title"
+        required
+      ></v-text-field>
+      <v-text-field v-model="details" ref="details" name="details" label="Details" required></v-text-field>
+      <v-select
+        v-model="select"
+        ref="category"
+        name="category"
+        :items="items"
+        label="Category"
+        required
+      ></v-select>
+      <v-btn color="primary" @click="$refs.plug.click()">Choose files</v-btn>
+      <input v-show="false" id="plug" ref="plug" type="file" name="plug" @change="fileChanged" >
+      <v-btn :disabled="!valid" color="success" @click="submitPlug">Post plug</v-btn>
+      <v-btn color="error" @click="reset">Reset Form</v-btn>
+    </v-form>
     <hr>
     <p class="error" v-if="error">{{error}}</p>
     <div class="plugs-container">
-      <div class="post"
-        v-for="(plug, index) in plugs"
+      <div
+        class="post"
+        v-for="(plug, index) in plug"
         v-bind:item="plug"
         v-bind:index="index"
         v-bind:key="plug._id"
       >
-      {{`${plug.createdAt.getDate()}/${plug.createdAt.getMonth()}/${plug.createdAt.getFullYear()}`}}
+        {{`${plug.createdAt.getDate()}/${plug.createdAt.getMonth()}/${plug.createdAt.getFullYear()}`}}
         <p class="text">{{plug.text}}</p>
       </div>
     </div>
@@ -24,37 +52,55 @@
 </template>
 
 <script>
-import PlugService from '../PlugService.js'
+/* eslint-disable */
+import PlugService from "../PlugService.js";
+import UploadButton from "vuetify-upload-button";
 
 export default {
-  name: 'PlugComponent',
-  data () {
+  name: "PlugComponent",
+  data() {
     return {
-      plugs: [],
-      error: '',
-      title: '',
-      category: '',
       plug: '',
-      details: ''
-    }
-  },
-  methods: {
-    submitFile(){
-      let formData = new FormData();
-    },
-    handleFileUpload(){
-        this.file = this.$refs.file.files[0];
-      }
+      valid: true,
+      select: null,
+      items: ["Graphics Design", "Art", "Music", "Programming"],
+      error: "",
+      title: "",
+      category: "",
+      plug: "",
+      details: ""
+    };
   },
 
-  async created () {
+  methods: {
+    submitPlug() {
+      let formData = new FormData();
+      formData.append("title", this.title);
+      formData.append("category", this.select);
+      formData.append("details", this.details);
+      formData.append("plug", this.file);
+      PlugService.insertPlug(formData);
+    },
+    fileChanged() {
+      this.file = this.$refs.plug.files[0];
+      console.log(this.file);
+    },
+    reset() {
+      this.$refs.form.reset();
+    },
+  },
+  components: {
+    "upload-btn": UploadButton
+  },
+
+  async created() {
     try {
-      this.posts = await PlugService.getPlugs
+      this.posts = await PlugService.getPlugs;
     } catch (err) {
-      this.error = err.message
+      this.error = err.message;
     }
   }
-}
+};
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
