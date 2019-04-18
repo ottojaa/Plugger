@@ -3,6 +3,7 @@ const moment = require("moment");
 const Post = require("../models/plug.js");
 const PostController = require("../controllers/PostController");
 const router = express.Router();
+const passport = require('passport')
 const multer = require("multer");
 const User = require('../models/user');
 const sharp = require("sharp");
@@ -17,14 +18,6 @@ const storage = multer.diskStorage({
     callback(null, file.originalname);
   }
 });
-
-const authMiddleware = (req, res, next) => {
-    if (!req.isAuthenticated()) {
-      res.status(401).send("You are not authenticated");
-    } else {
-      return next();
-    }
-  };
 
 const upload = multer({
   storage: storage
@@ -55,7 +48,7 @@ router.post("/", upload.single("plug"), async (req, res) => {
           res.send(post);
         })
         .catch(err => {
-          res.send("Failed to upload because:", err);
+          res.send("Failed to upload because:", err); // to json
         });
     })
     .catch(err => {
@@ -146,17 +139,15 @@ router.post("/search", upload.single("Post"), (req, res) => {
 
 //------------- Register - Login - User -------------//
 
-router.post("/authenticate", (req, res) => {
-  passport.authenticate("local", (err, user, info) => {
-    if (err) {
-      return next(err);
-    }
-
+router.post("/authenticate", (req, res, next) => {
+  passport.authenticate('local', (err, user, info) => {
+    if (err) { return next(err) }
     if (!user) {
-      return res.status(400).send([user, "Login failed", info]);
+      return res.send({error: "Invalid login credentials"})
     }
-    req.login(user, err => {
-      res.send("Logged in");
+    req.logIn(user, function(err) {
+      if (err) { return next(err); }
+      return res.send(user)
     });
   })(req, res, next);
 });
@@ -165,25 +156,30 @@ router.get('/logout', function(req, res) {
   return res.send("Logged out succesfully");
 });
 
-router.get('/user', authMiddleware, (req, res) => {
-  let user = users.find(user => {
-    return user.id === req.session.passport.user;
-  });
-  console.log([user, req.session]);
-  res.send({ user: user });
+router.get('/user', (req, res) => {
+  res.send(req.user);
 });
 
-router.get("/register", upload.single("Post"), (req, res) => {
-    if (User.findOne({ username: req.body.username })) {
-        throw 'Username "' + req.body.username + '" is already taken';
-    }
-    const user = new User(userParam);
+router.post("/register", (req, res) => {
+  const password = req.body.password;
+  const passwordAgain = req.body.passwordAgain;
 
-    if (userParam.password) {
-        user.hash = bcrypt.hashSync(userParam.password, 10);
-    }
-    console.log('heijaa');
-    user.save();
+  if (password == passwordAgain){
+    const newUser = new User({
+      username: req.body.username,
+      email: req.body.email,
+      password: req.body.password,
+      firstname: req.body.firstname,
+      lastname: req.body.lastname
+    });
+
+    User.createUser(newUser, function(err, user){
+      if(err) throw err;
+      res.send(user).end()
+    });
+  } else{
+    res.status(500).send("{errors: \"Passwords don't match\"}").end()
+  }
 });
 
 module.exports = router;

@@ -1,34 +1,63 @@
 
 <template>
   <div class="container">
-    <h1>Create a new plug</h1>
-    <v-form ref="form" v-model="valid" lazy-validation>
-      <v-text-field
-        v-model="title"
-        ref="title"
-        name="title"
-        :counter="30"
-        :rules="[v => !!v || 'Title is required', v => (v && v.length <= 30) || 'Title must be less than 30 characters']"
-        label="Title"
-        required
-      ></v-text-field>
-      <v-text-field v-model="details" ref="details" name="details" placeholder="A description of your project" label="Details" required></v-text-field>
-      <v-select
-        v-model="select"
-        ref="category"
-        name="category"
-        :items="items"
-        label="Category"
-        required
-      ></v-select>
-      <v-btn color="primary" @click="$refs.plug.click()">Choose files</v-btn>
-      <input v-show="false" id="plug" ref="plug" type="file" name="plug" @change="fileChanged">
-      <v-btn :disabled="!valid" color="success" @click="submitPlug">Post plug</v-btn>
-      <v-btn color="error" @click="reset">Reset Form</v-btn>
-    </v-form>
-    <hr>
-    <p class="error" v-if="error">{{error}}</p>
-    
+    <v-card>
+      <v-card-title class="headline font-weight-regular blue lighten-1 white--text">
+        Search
+        <v-spacer></v-spacer>
+        <v-icon>search</v-icon>
+      </v-card-title>
+      <v-card-text>
+        <v-subheader class="pa-0">Search plugs by titles</v-subheader>
+        <v-autocomplete
+          v-model="model"
+          :items="titles"
+          persistent-hint
+          prepend-icon="mdi-city"
+        >
+          <template v-slot:append-outer>
+            <v-slide-x-reverse-transition mode="out-in"></v-slide-x-reverse-transition>
+          </template>
+        </v-autocomplete>
+      </v-card-text>
+    </v-card>
+    <v-layout align-center justify-center row wrap fill-height>
+      <v-flex
+        xs2
+        sm3
+        md4
+        class="margin"
+        v-for="(plug, index) in plugs"
+        v-bind:item="plug"
+        v-bind:index="index"
+        v-bind:key="plug._id"
+      >
+        <v-card class="ma-2">
+          <v-img v-bind:src="'https:/localhost:3000/' + plug.fileName" aspect-ratio="2.75"></v-img>
+          <v-card-title primary-title>
+            <div>
+              <h3 class="headline mb-0">{{plug.title}}</h3>
+              <div>{{plug.details}}</div>
+            </div>
+          </v-card-title>
+
+          <v-card-actions>
+            <v-btn flat color="black">Accept plug</v-btn>
+            <v-btn flat color="purple">Hide</v-btn>
+            <v-spacer></v-spacer>
+            <v-btn icon @click="show = !show">
+              <v-icon>{{ show ? 'keyboard_arrow_down' : 'keyboard_arrow_up' }}</v-icon>
+            </v-btn>
+          </v-card-actions>
+          <v-slide-y-transition>
+            <v-card-text
+              v-show="show"
+            >"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."</v-card-text>
+          </v-slide-y-transition>
+        </v-card>
+        <v-spacer></v-spacer>
+      </v-flex>
+    </v-layout>
   </div>
 </template>
 
@@ -51,7 +80,10 @@ export default {
       title: "",
       category: "",
       plug: "",
-      details: ""
+      details: "",
+      isEditing: false,
+      model: null,
+      titles: []
     };
   },
 
@@ -78,62 +110,15 @@ export default {
   async created() {
     try {
       this.plugs = await PlugService.getPlugs();
+      this.titles = await PlugService.getTitles();
     } catch (err) {
       this.error = err.message;
     } finally {
-      console.log(this.plug[0]);
+      console.log(this.titles);
     }
   }
 };
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-h3 {
-  margin: 40px 0 0;
-}
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-a {
-  color: #42b983;
-}
-div.container {
-  max-width: 800px;
-  margin: 0 auto;
-}
-p.error {
-  border: 1px solid #ff5b5f;
-  background-color: #ffc5c1;
-  padding: 10px;
-  margin-bottom: 15px;
-}
-div.post {
-  position: relative;
-  border: 1px solid #5bd658;
-  background-color: #bcffb8;
-  padding: 10px 10px 30px 10px;
-  margin-bottom: 15px;
-}
-
-div.created-at {
-  position: absolute;
-  top: 0;
-  left: 0;
-  padding: 5px 15 px 5px 15px;
-  background-color: darkgreen;
-  color: white;
-  font-size: 13px;
-}
-
-p.text {
-  font-size: 22px;
-  font-weight: 700;
-  margin-bottom: 0;
-}
 </style>

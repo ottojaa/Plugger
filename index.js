@@ -8,68 +8,64 @@ const path = require("path");
 const fs = require("fs");
 const cors = require("cors");
 const router = require("./routes/router.js");
-
+const session = require("express-session");
+const cookieParser = require("cookie-parser");
+const passport = require("passport");
+const User = require("./models/user");
 const sslkey = fs.readFileSync("ssl-key.pem");
 const sslcert = fs.readFileSync("ssl-cert.pem");
+const LocalStrategy = require("passport-local").Strategy;
 
 const options = {
   key: sslkey,
   cert: sslcert
 };
-
-const cookieSession = require("cookie-session");
-const passport = require("passport");
-const LocalStrategy = require("passport-local").Strategy;
-
-passport.serializeUser((user, done) => {
-  done(null, user.id);
-});
-
-passport.deserializeUser((id, done) => {
-  let user = users.find(user => {
-    return user.id === id;
-  });
-
-  done(null, user);
-});
-passport.use(
-  new LocalStrategy(
-    {
-      usernameField: "email",
-      passwordField: "password"
-    },
-
-    (username, password, done) => {
-      let user = users.find(user => {
-        return user.email === username && user.password === password;
-      });
-
-      if (user) {
-        done(null, user);
-      } else {
-        done(null, false, { message: "Incorrect username or password" });
-      }
-    }
-  )
-);
-
 const app = express();
 app.use(bodyParser.json());
 app.use(
   bodyParser.urlencoded({
-    extended: true
+    extended: false
   })
 );
+app.use(cookieParser());
 app.use(
-  cookieSession({
-    name: "mysession",
-    keys: ["randomkey"],
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  session({
+    secret: "secret is secret",
+    saveUninitialized: true,
+    resave: true
   })
 );
-app.use(cors());
+
 app.use(passport.initialize());
 app.use(passport.session());
+passport.use(
+  new LocalStrategy(function(username, password, done) {
+    User.getUserByUsername(username, function(err, user) {
+      if (err) throw err;
+      if (!user) {
+        return done(null, false, { message: "Unknown User" });
+      }
+      User.comparePassword(password, user.password, function(err, isMatch) {
+        if (err) throw err;
+        if (isMatch) {
+          return done(null, user);
+        } else {
+          return done(null, false, { message: "Invalid password" });
+        }
+      });
+    });
+  })
+);
+passport.serializeUser(function(user, done) {
+  done(null, user._id);
+});
+
+passport.deserializeUser(function(id, done) {
+  User.findById(id, function(err, user) {
+    done(err, user);
+  });
+});
+app.use(cors());
 app.use(express.static(__dirname + "/public"));
 app.use(express.static(__dirname + "/public/small"));
 app.use(express.static("uploads"));

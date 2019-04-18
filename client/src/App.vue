@@ -39,17 +39,20 @@
 
 <script>
 /* eslint-disable */
-import MainPage from './components/MainPage'
-import GalleryPage from './components/GalleryPage'
-import LoginPage from './components/LoginPage'
-import RegisterPage from './components/RegisterPage'
-import UserPage from './components/UserPage'
+import GalleryPage from '@/components/GalleryPage'
+import LoginPage from '@/components/LoginPage'
+import RegisterPage from '@/components/RegisterPage'
+import UserPage from '@/components/UserPage'
+import AddPlugPage from '@/components/AddPlugPage'
 
 export default {
   name: 'App',
   components: {
-    MainPage,
-    GalleryPage
+    GalleryPage,
+    LoginPage,
+    RegisterPage,
+    UserPage,
+    AddPlugPage,
   },
   data () {
     return {

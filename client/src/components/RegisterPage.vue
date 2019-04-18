@@ -1,77 +1,119 @@
 <template>
-
   <v-content>
     <v-content>
-        <v-container fluid fill-height>
-          <v-layout align-center justify-center>
-            <v-flex xs12 sm8 md4>
-              <v-card class="elevation-12">
-                <v-toolbar dark color="primary">
-                  <v-toolbar-title>register form</v-toolbar-title>
+      <v-container fluid fill-height>
+        <v-layout align-center justify-center>
+          <v-flex xs12 sm8 md4>
+            <v-card class="elevation-12">
+              <v-toolbar dark color="primary">
+                <v-toolbar-title>Register form</v-toolbar-title>
+                <v-spacer></v-spacer>
+              </v-toolbar>
+              <v-card-text>
+                <v-form ref="form" id="form">
+                  <v-text-field
+                    prepend-icon="person"
+                    v-model="username"
+                    ref="username"
+                    name="username"
+                    :counter="10"
+                    label="Username"
+                    required
+                  ></v-text-field>
+                  <v-text-field
+                    prepend-icon="email"
+                    v-model="email"
+                    ref="email"
+                    name="email"
+                    label="E-mail"
+                    required
+                  ></v-text-field>
+                  <v-text-field
+                    v-model="firstname"
+                    name="firstname"
+                    ref="firstname"
+                    label="First Name"
+                    required
+                  ></v-text-field>
+                  <v-text-field
+                    v-model="lastname"
+                    name="lastname"
+                    ref="lastname"
+                    label="Last Name"
+                    required
+                  ></v-text-field>
+                  <v-text-field
+                    prepend-icon="lock"
+                    v-model="password"
+                    ref="password"
+                    name="password"
+                    type="password"
+                    label="Password"
+                    required
+                  ></v-text-field>
+                  <v-text-field
+                    prepend-icon="lock"
+                    v-model="passwordAgain"
+                    ref="password"
+                    name="passwordAgain"
+                    type="password"
+                    label="Type password again"
+                    required
+                  ></v-text-field>
                   <v-spacer></v-spacer>
-                </v-toolbar>
-                <v-card-text>
-                  <v-form v-on:submit="register">
-                    <v-text-field
-                      prepend-icon="person"
-                      v-model="username"
-                      name="username"
-                      :counter="10"
-                      label="Username"
-                      required
-                    ></v-text-field>
-                    <v-text-field
-                      prepend-icon="lock"
-                      v-model="password"
-                      name="password"
-                      label="Password"
-                      required
-                    ></v-text-field>
-                     <v-text-field
-                      prepend-icon="lock"
-                      v-model="firstname"
-                      name="firstname"
-                      label="First Name"
-                      required
-                    ></v-text-field>
-                    <v-text-field
-                      prepend-icon="lock"
-                      v-model="lastname"
-                      name="lastname"
-                      label="Last Name"
-                      required
-                    ></v-text-field>
-                    <v-spacer></v-spacer>
+                  <div class="center">
                     <v-btn color="primary" @click="register">register</v-btn>
-                    <v-btn class="button" color="pink" @click="$router.push('/register')">Register</v-btn>
-                  </v-form>
-                </v-card-text>
-              </v-card>
-            </v-flex>
-          </v-layout>
-        </v-container>
-      </v-content>
+                    <v-btn
+                      class="button white--text"
+                      color="pink"
+                      @click="$router.push('/login')"
+                    >login</v-btn>
+                  </div>
+                </v-form>
+              </v-card-text>
+            </v-card>
+          </v-flex>
+        </v-layout>
+      </v-container>
+    </v-content>
   </v-content>
 </template>
 <script>
 /* eslint-disable */
+
+import PlugService from "../PlugService.js";
+import router from "../routes.js";
+const serialize = require("form-serialize");
 export default {
-  data: () => ({
-    valid: true,
-    username: "",
-    firstname: "",
-    lastname: "",
-    email: "",
-  }),
+  data() {
+    return {
+      valid: true,
+      username: "",
+      firstname: "",
+      lastname: "",
+      email: "",
+      password: "",
+      passwordAgain: ""
+    };
+  },
 
   methods: {
     register() {
+      const form = document.querySelector("#form");
       let formData = new FormData();
-      formData.append("username", this.username);
-      formData.append("password", this.password);
-      formData.append("firstname", this.firstname);
-      formData.append("lastname", this.lastname);
-      PlugService.register(formData);
+      formData.set("username", this.username);
+      formData.set("email", this.email);
+      formData.set("password", this.password);
+      formData.set("firstname", this.firstname);
+      formData.set("lastname", this.lastname);
+      const query = serialize(form);
+      PlugService.register(query)
+        .then(() => {
+          this.$router.push("/");
+        })
+        .catch(err => {
+          console.log(err);
+        });
     },
     reset() {
       this.$refs.form.reset();
@@ -79,3 +121,10 @@ export default {
   }
 };
 </script>
+<style scoped>
+  .center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+</style>

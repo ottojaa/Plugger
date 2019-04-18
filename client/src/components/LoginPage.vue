@@ -11,25 +11,30 @@
                   <v-spacer></v-spacer>
                 </v-toolbar>
                 <v-card-text>
-                  <v-form v-on:submit="login">
+                  <v-form v-on:submit="login" ref="form">
                     <v-text-field
                       prepend-icon="person"
                       v-model="username"
                       name="username"
-                      :counter="10"
                       label="Username"
                       required
                     ></v-text-field>
                     <v-text-field
                       prepend-icon="lock"
                       v-model="password"
+                      type="password"
                       name="password"
                       label="Password"
                       required
                     ></v-text-field>
                     <v-spacer></v-spacer>
-                    <v-btn color="primary" @click="login">Login</v-btn>
-                    <v-btn class="button" color="pink" @click="$router.push('/register')">Register</v-btn>
+                    <div class="status">
+                      {{ statusMessage }}
+                    </div>
+                    <div class="center">
+                      <v-btn color="primary" @click="login">Login</v-btn>
+                      <v-btn class="button" color="pink" @click="$router.push('/register')">Register</v-btn>
+                    </div>
                   </v-form>
                 </v-card-text>
               </v-card>
@@ -43,22 +48,40 @@
 <script>
 /* eslint-disable */
 import axios from "axios";
+import router from "../routes.js";
 import PlugService from "../PlugService.js";
+const serialize = require("form-serialize");
+
 export default {
   data() {
     return {
       username: "",
-      password: ""
+      password: "",
+      statusMessage: ""
     };
   },
   name: "Login",
 
   methods: {
     login() {
+      const form = document.querySelector("#form");
       let formData = new FormData();
       formData.append("username", this.username);
       formData.append("password", this.password);
-      PlugService.login(formData);
+      const query = serialize(form);
+      PlugService.login(formData)
+        .then((res) => {
+          console.log();
+          if (res.data.error) {
+             this.statusMessage = res.data.error
+          } else {
+            this.$router.push("/");
+          }
+         
+        })
+        .catch(err => {
+          console.log(err);
+        });
     }
   }
 };
@@ -66,5 +89,13 @@ export default {
 <style scoped>
 button {
   color: white !important;
+}
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.status {
+  color: red;
 }
 </style>

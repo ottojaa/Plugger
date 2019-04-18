@@ -57,11 +57,12 @@ class PlugService {
       method: 'post',
       url: requestUrl,
       data: formData,
-      headers: { 'Content-Type': 'multipart/form-data' }
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      }
     })
       .then(response => {
-        console.log(response)
-        router.push('/dashboard')
+        return response;
       })
       .catch(err => {
         console.log('Cannot log in', err)
@@ -69,19 +70,20 @@ class PlugService {
   }
   static register (formData) {
     const requestUrl = `${url}${'register'}`
-    console.log(formData);
+    console.log(formData)
     return axios({
       method: 'post',
       url: requestUrl,
       data: formData,
-      headers: { 'Content-Type': 'multipart/form-data' }
+      timeout: 3000,
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded', }
     })
       .then(response => {
         console.log(response)
         router.push('/dashboard')
       })
       .catch(err => {
-        console.log('Cannot log in', err)
+        console.log('Cannot register because:', err)
       })
   }
 
