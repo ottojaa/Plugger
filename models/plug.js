@@ -19,6 +19,21 @@ const postSchema = mongoose.Schema({
     },
     fileName: {
         type: String
+    },
+    owner: {
+        type: String
+    },
+    phone: {
+        type: String,
+        required: true
+    },
+    email: {
+        type: String,
+        required: true
+    },
+    location: {
+        type: String,
+        required: true
     }
 });
 

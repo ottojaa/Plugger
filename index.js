@@ -8,13 +8,14 @@ const path = require("path");
 const fs = require("fs");
 const cors = require("cors");
 const router = require("./routes/router.js");
-const session = require("express-session");
+const expressSession = require("express-session");
 const cookieParser = require("cookie-parser");
 const passport = require("passport");
 const User = require("./models/user");
 const sslkey = fs.readFileSync("ssl-key.pem");
 const sslcert = fs.readFileSync("ssl-cert.pem");
 const LocalStrategy = require("passport-local").Strategy;
+const MongoStore = require("connect-mongo")(expressSession);
 
 const options = {
   key: sslkey,
@@ -28,13 +29,6 @@ app.use(
   })
 );
 app.use(cookieParser());
-app.use(
-  session({
-    secret: "secret is secret",
-    saveUninitialized: true,
-    resave: true
-  })
-);
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -65,7 +59,26 @@ passport.deserializeUser(function(id, done) {
     done(err, user);
   });
 });
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header('Access-Control-Allow-Methods', 'DELETE, PUT');
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  if ('OPTIONS' == req.method) {
+     res.sendStatus(200);
+   }
+   else {
+     next();
+   }});
 app.use(cors());
+app.use(
+  expressSession({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    store: new MongoStore({ mongooseConnection: mongoose.connection })
+  })
+);
+
 app.use(express.static(__dirname + "/public"));
 app.use(express.static(__dirname + "/public/small"));
 app.use(express.static("uploads"));
@@ -85,6 +98,24 @@ mongoose
   .catch(e => {
     console.log("Connection to db failed because:", e);
   });
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET, POST, OPTIONS, PUT, PATCH, DELETE"
+  );
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept"
+  );
+  next();
+});
+app.use("/", function(req, res, next) {
+  if (req.isAuthenticated()) {
+    console.log(res);
+  }
+  next();
+});
 app.use("/", router);
 
 function appListen() {

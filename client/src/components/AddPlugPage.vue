@@ -11,7 +11,14 @@
         label="Title"
         required
       ></v-text-field>
-      <v-text-field v-model="details" ref="details" name="details" placeholder="A description of your project" label="Details" required></v-text-field>
+      <v-textarea
+        v-model="details"
+        ref="details"
+        name="details"
+        placeholder="A description of your project"
+        label="Details"
+        required
+      ></v-textarea>
       <v-select
         v-model="select"
         ref="category"
@@ -20,6 +27,46 @@
         label="Category"
         required
       ></v-select>
+      <h1 style="margin-top: 40px">Contact Information</h1>
+      <v-list two-line>
+        <v-list-tile>
+          <v-list-tile-action>
+            <v-icon color="indigo">mail</v-icon>
+          </v-list-tile-action>
+
+          <v-list-tile-content>
+            <v-list-tile-title>Email</v-list-tile-title>
+            <v-list-tile-sub-title>
+              <v-text-field v-model="email" name="email">kasjd</v-text-field>
+            </v-list-tile-sub-title>
+          </v-list-tile-content>
+        </v-list-tile>
+        <v-list-tile>
+          <v-list-tile-action>
+            <v-icon color="indigo">phone</v-icon>
+          </v-list-tile-action>
+
+          <v-list-tile-content>
+            <v-list-tile-title>Phone</v-list-tile-title>
+            <v-list-tile-sub-title>
+              <v-text-field v-model="phone" name="phone">kasjd</v-text-field>
+            </v-list-tile-sub-title>
+          </v-list-tile-content>
+        </v-list-tile>
+        <v-list-tile>
+          <v-list-tile-action>
+            <v-icon color="indigo">location_on</v-icon>
+          </v-list-tile-action>
+
+          <v-list-tile-content>
+            <v-list-tile-title>Location</v-list-tile-title>
+            <v-list-tile-sub-title>
+              <v-text-field v-model="location" name="location">kasjd</v-text-field>
+            </v-list-tile-sub-title>
+          </v-list-tile-content>
+        </v-list-tile>
+      </v-list>
+
       <v-btn color="primary" @click="$refs.plug.click()">Choose files</v-btn>
       <input v-show="false" id="plug" ref="plug" type="file" name="plug" @change="fileChanged">
       <v-btn :disabled="!valid" color="success" @click="submitPlug">Post plug</v-btn>
@@ -44,12 +91,16 @@ export default {
       plugs: [],
       valid: true,
       select: null,
-      items: ["Graphics Design", "Art", "Music", "Programming"],
+      items: ["Graphic Design", "Art", "Music", "Programming"],
       error: "",
       title: "",
       category: "",
       plug: "",
-      details: ""
+      details: "",
+      phone: "",
+      email: "",
+      location: "",
+      owner: ""
     };
   },
 
@@ -60,6 +111,10 @@ export default {
       formData.append("category", this.select);
       formData.append("details", this.details);
       formData.append("plug", this.file);
+      formData.append("email", this.email);
+      formData.append("phone", this.phone);
+      formData.append("location", this.location);
+      formData.append("owner", this.owner)
       PlugService.insertPlug(formData);
     },
     fileChanged() {
@@ -76,10 +131,12 @@ export default {
   async created() {
     try {
       this.plugs = await PlugService.getPlugs();
+      this.user = await PlugService.user;
     } catch (err) {
       this.error = err.message;
     } finally {
-      console.log(this.plug[0]);
+      this.owner = this.user.data._id;
+      console.log(this.owner)
     }
   }
 };

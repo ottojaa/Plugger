@@ -24,10 +24,10 @@
       <v-btn
         flat
         color="blue"
-        @click="$router.push('/login')"
+        @click="logOut"
         target="_blank"
       >
-        <span class="mr-2">Login</span>
+        <span class="mr-2">Logout</span>
       </v-btn>
       <v-btn
         flat
@@ -49,7 +49,9 @@
 /* eslint-disable */
 import GalleryPage from '@/components/GalleryPage'
 import LoginPage from '@/components/LoginPage'
+import router from "./routes.js";
 import RegisterPage from '@/components/RegisterPage'
+import PlugService from './PlugService.js'
 import UserPage from '@/components/UserPage'
 import AddPlugPage from '@/components/AddPlugPage'
 
@@ -62,9 +64,43 @@ export default {
     UserPage,
     AddPlugPage,
   },
-  data () {
+  data() {
     return {
-      //
+      user: "",
+      email: "",
+      lastname: "",
+      firstname: "",
+      username: "",
+      readonly: true,
+      loggedIn: false,
+    };
+  },
+  methods: {
+    readOnly() {
+      this.readonly = !this.readonly;
+    },
+    async logOut() {
+      await PlugService.logout().then(() => {
+        this.$router.push("/login");
+      });
+    }
+  },
+  async created() {
+    try {
+      this.user = await PlugService.getUser();
+    } catch (err) {
+      console.log(err);
+      this.error = err.message;
+    } finally {
+      this.username = this.user.data.username;
+      this.email = this.user.data.email;
+      this.firstname = this.user.data.firstname;
+      this.lastname = this.user.data.lastname;
+      if (this.username !== 'undefined' || this.username === '') {
+        this.loggedIn = true
+        console.log(this.loggedIn)
+      }
+      console.log(this.user)
     }
   }
 }

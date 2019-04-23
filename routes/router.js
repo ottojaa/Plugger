@@ -19,6 +19,7 @@ const storage = multer.diskStorage({
   }
 });
 
+
 const upload = multer({
   storage: storage
 });
@@ -32,13 +33,18 @@ router.get("/upload", (req, res) => {
 });
 
 router.post("/", upload.single("plug"), async (req, res) => {
+  console.log(req.body)
   const post = new Post({
     createdAt: moment(),
     title: req.body.title,
     plug: req.file.path,
     category: req.body.category,
     details: req.body.details,
-    fileName: req.file.originalname
+    fileName: req.file.originalname,
+    owner: req.body.owner,
+    phone: req.body.phone,
+    location: req.body.location,
+    email: req.body.email
   });
   await post
     .save()
@@ -57,6 +63,7 @@ router.post("/", upload.single("plug"), async (req, res) => {
 });
 
 router.get("/gallery", async (req, res) => {
+  console.log(req.session.username);
   await PostController.find_all_posts()
     .then(post => {
       res.send(post);
@@ -106,35 +113,25 @@ router.get("/gallery/:id", (req, res) => {
   });
 });
 
-router.post("/search", upload.single("Post"), (req, res) => {
-  if (req.body.searchterm !== "" && req.body.searchBy === "all") {
-    PostController.Post_search_all(req.body.searchterm)
+router.get("/search/:searchterm", (req, res) => {
+  console.log(req.params.searchterm)
+  if (req.params.searchterm !== "") {
+    PostController.Post_search_all(req.params.searchterm)
       .then(post => {
         res.send(post);
       })
       .catch(err => {
         console.log(err);
       });
-  } else if (req.body.searchterm === "") {
-    PostController.Post_search_all(req.body.searchterm)
+  } else if (req.params.searchterm === "") {
+    PostController.Post_search_all(req.params.searchterm)
       .then(post => {
         res.send(post);
       })
       .catch(err => {
         console.log(err);
       });
-  } else if (req.body.searchterm !== "" && req.body.searchby !== "all") {
-    PostController.Post_search_by_category(
-      req.body.searchterm,
-      req.body.searchby
-    )
-      .then(post => {
-        res.send(post);
-      })
-      .catch(err => {
-        console.log(err);
-      });
-  }
+    }
 });
 
 //------------- Register - Login - User -------------//
@@ -160,6 +157,13 @@ router.get('/logout', function(req, res) {
 });
 
 router.get('/user', (req, res) => {
+  function isAuthenticated(req, res, next) {
+    console.log(req.user)
+    if (req.user) {
+      return next();
+    }
+    res.redirect('/login');
+  }
   return res.send(req.user);
 });
 

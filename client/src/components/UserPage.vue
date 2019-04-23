@@ -1,21 +1,21 @@
 <template>
   <v-container class="main" fill-height fluid grid-list-xl>
-    <v-layout justify-center wrap v-bind:item="state">
+    <v-layout justify-center wrap>
       <v-flex xs12 md8>
         <v-form :readonly="true">
           <v-container py-0>
             <v-layout wrap>
               <v-flex xs12 md12>
-                <v-text-field class="purple-input" label="User Name" v-model="username"/>
+                <v-text-field class="purple-input" v-bind:readonly="readonly" label="User Name" v-model="username"/>
               </v-flex>
               <v-flex xs12 md12>
-                <v-text-field label="Email Address" v-model="email" class="purple-input"/>
+                <v-text-field label="Email Address" v-model="email" v-bind:readonly="readonly" class="purple-input"/>
               </v-flex>
               <v-flex xs12 md12>
-                <v-text-field label="First Name" v-model="firstname" class="purple-input"/>
+                <v-text-field label="First Name" v-model="firstname" v-bind:readonly="readonly" class="purple-input"/>
               </v-flex>
               <v-flex xs12 md12>
-                <v-text-field label="Last Name" v-model="lastname" class="purple-input"/>
+                <v-text-field label="Last Name" v-model="lastname" v-bind:readonly="readonly" class="purple-input"/>
               </v-flex>
               <v-flex xs12 text-xs-right>
                 <v-btn
@@ -54,7 +54,7 @@ export default {
       lastname: "",
       firstname: "",
       username: "",
-      state: true
+      readonly: true
     };
   },
   methods: {

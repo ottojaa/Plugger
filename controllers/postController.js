@@ -13,6 +13,7 @@ exports.Post_search_by_category = (searchTerm, searchCategory) => {
 };
 
 exports.Post_search_all = (searchTerm) => {
+    console.log(searchTerm)
     return Post.find({$text: {$search: searchTerm}}, {score: {$meta: "textScore"}})
         .sort({score: {$meta: "textScore"}})
         .then((post) => {

@@ -4,22 +4,21 @@
     <v-card>
       <v-card-title class="headline font-weight-regular blue lighten-1 white--text">
         Search
-        <v-spacer></v-spacer>
-        <v-icon>search</v-icon>
-      </v-card-title>
-      <v-card-text>
-        <v-subheader class="pa-0">Search plugs by titles</v-subheader>
-        <v-autocomplete
-          v-model="model"
+        <v-combobox
+          name="searchterm"
           :items="titles"
+          id="searchField"
           persistent-hint
           prepend-icon="mdi-city"
         >
           <template v-slot:append-outer>
             <v-slide-x-reverse-transition mode="out-in"></v-slide-x-reverse-transition>
           </template>
-        </v-autocomplete>
-      </v-card-text>
+        </v-combobox>
+        <v-btn flat color="black" @click="search">
+          <v-icon>search</v-icon>
+        </v-btn>
+      </v-card-title>
     </v-card>
     <v-layout align-center justify-center row wrap fill-height>
       <v-flex
@@ -32,7 +31,7 @@
         v-bind:index="index"
         v-bind:key="plug._id"
       >
-        <v-card class="ma-2">
+        <v-card class="ma-2" @click="getId(index)">
           <v-img v-bind:src="'https:/localhost:3000/' + plug.fileName" aspect-ratio="2.75"></v-img>
           <v-card-title primary-title>
             <div>
@@ -42,7 +41,6 @@
           </v-card-title>
 
           <v-card-actions>
-            <v-btn flat color="black">Accept plug</v-btn>
             <v-btn flat color="purple">Hide</v-btn>
             <v-spacer></v-spacer>
             <v-btn icon @click="show = !show">
@@ -65,6 +63,7 @@
 /* eslint-disable */
 import PlugService from "../PlugService.js";
 import UploadButton from "vuetify-upload-button";
+import router from "../routes.js";
 
 export default {
   name: "PlugComponent",
@@ -82,25 +81,30 @@ export default {
       plug: "",
       details: "",
       isEditing: false,
-      model: null,
-      titles: []
+      searchterm: "",
+      titles: [],
+      plugId: "",
     };
   },
 
   methods: {
-    submitPlug() {
-      let formData = new FormData();
-      formData.append("title", this.title);
-      formData.append("category", this.select);
-      formData.append("details", this.details);
-      formData.append("plug", this.file);
-      PlugService.insertPlug(formData);
-    },
     fileChanged() {
       this.file = this.$refs.plug.files[0];
     },
     reset() {
       this.$refs.form.reset();
+    },
+    getId(index) {
+      this.plugId = this.plugs[index]._id;
+      this.$router.push({ path: "/plug/", query: { plugId: this.plugId } });
+    },
+    async search() {
+      this.search = document.getElementById('searchField').value;
+      this.plugs = await PlugService.search(this.search); 
+      this.search = ''
+    },
+    async resetSearch() {
+      this.plugs = await PlugService.getPlugs();
     }
   },
   components: {
@@ -114,7 +118,7 @@ export default {
     } catch (err) {
       this.error = err.message;
     } finally {
-      console.log(this.titles);
+      console.log(this.plugs);
     }
   }
 };
