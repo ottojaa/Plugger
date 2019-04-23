@@ -5,6 +5,8 @@ import router from './routes'
 
 const url = 'https://localhost:3000/';
 
+let user = '';
+
 class PlugService {
   static getPlugs () {
     return new Promise(async (resolve, reject) => {
@@ -52,7 +54,6 @@ class PlugService {
   }
   static login (formData) {
     const requestUrl = `${url}${'authenticate'}`
-    console.log(formData);
     return axios({
       method: 'post',
       url: requestUrl,
@@ -62,6 +63,7 @@ class PlugService {
       }
     })
       .then(response => {
+        console.log(response + 'HELAHJSKDl')
         return response;
       })
       .catch(err => {
@@ -70,7 +72,6 @@ class PlugService {
   }
   static register (formData) {
     const requestUrl = `${url}${'register'}`
-    console.log(formData)
     return axios({
       method: 'post',
       url: requestUrl,
@@ -89,6 +90,30 @@ class PlugService {
 
   static deletePlug (id) {
     return axios.delete(`${url}${id}`)
+  }
+  /* static getUser () {
+    const requestUrl = `${url}${'user'}`
+    return axios({
+      url: requestUrl,
+      method: 'get'
+    }).then((res) => {
+      console.log(res)
+    })
+  } */
+  static getUser () {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const requestUrl = `${url}${'user'}`
+        const res = await axios.get(requestUrl)
+        const data = res.data
+        console.log(res, data, requestUrl)
+        resolve(
+          data
+        )
+      } catch (err) {
+        reject(err)
+      }
+    })
   }
 }
 

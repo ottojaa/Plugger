@@ -9,12 +9,7 @@
       </v-card-title>
       <v-card-text>
         <v-subheader class="pa-0">Search plugs by titles</v-subheader>
-        <v-autocomplete
-          v-model="model"
-          :items="titles"
-          persistent-hint
-          prepend-icon="mdi-city"
-        >
+        <v-autocomplete v-model="model" :items="titles" persistent-hint prepend-icon="mdi-city">
           <template v-slot:append-outer>
             <v-slide-x-reverse-transition mode="out-in"></v-slide-x-reverse-transition>
           </template>

@@ -29,6 +29,14 @@
       >
         <span class="mr-2">Login</span>
       </v-btn>
+      <v-btn
+        flat
+        color="blue"
+        @click="$router.push('/userpage')"
+        target="_blank"
+      >
+        <span class="mr-2">Dashboard</span>
+      </v-btn>
     </v-toolbar>
 
     <v-content>

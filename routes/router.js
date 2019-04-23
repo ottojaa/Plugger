@@ -140,13 +140,16 @@ router.post("/search", upload.single("Post"), (req, res) => {
 //------------- Register - Login - User -------------//
 
 router.post("/authenticate", (req, res, next) => {
+  console.log(req.body)
   passport.authenticate('local', (err, user, info) => {
     if (err) { return next(err) }
     if (!user) {
+      console.log(user)
       return res.send({error: "Invalid login credentials"})
     }
     req.logIn(user, function(err) {
       if (err) { return next(err); }
+      console.log(user)
       return res.send(user)
     });
   })(req, res, next);
@@ -157,7 +160,7 @@ router.get('/logout', function(req, res) {
 });
 
 router.get('/user', (req, res) => {
-  res.send(req.user);
+  return res.send(req.user);
 });
 
 router.post("/register", (req, res) => {

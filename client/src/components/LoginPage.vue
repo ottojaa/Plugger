@@ -11,7 +11,7 @@
                   <v-spacer></v-spacer>
                 </v-toolbar>
                 <v-card-text>
-                  <v-form v-on:submit="login" ref="form">
+                  <v-form ref="form" id="form">
                     <v-text-field
                       prepend-icon="person"
                       v-model="username"
@@ -69,9 +69,9 @@ export default {
       formData.append("username", this.username);
       formData.append("password", this.password);
       const query = serialize(form);
-      PlugService.login(formData)
+      PlugService.login(query)
         .then((res) => {
-          console.log();
+          PlugService.user = res;
           if (res.data.error) {
              this.statusMessage = res.data.error
           } else {
