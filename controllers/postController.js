@@ -29,9 +29,7 @@ exports.Post_search_all = searchTerm => {
 };
 
 exports.find_all_posts = () => {
-  return Post.find()
-    .select("time title Post category details fileName")
-    .exec()
+  return Post.find({})
     .then(post => {
       return post;
     })
@@ -42,8 +40,9 @@ exports.find_all_posts = () => {
 };
 
 exports.find_by_owner = (currentUser) => {
+  console.log(currentUser);
   return Post.find()
-    .where("owner")
+    .where("username")
     .equals(currentUser)
     .then(post => {
       return post;
@@ -62,6 +61,15 @@ exports.find_by_id = (id) => {
       return err;
     });
 };
+exports.find_my_plugs = (id) => {
+  return Post.find(id)
+    .then(post => {
+      return post;
+    })
+    .catch(err => {
+      return err;
+    })
+}
 
 exports.get_all_Posts = () => {
   return Post.find()

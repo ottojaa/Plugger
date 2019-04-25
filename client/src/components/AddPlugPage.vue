@@ -1,5 +1,5 @@
-<template>
-  <div class="container">
+<template >
+  <div v-show="loginstatus" class="container">
     <h1>Create a new plug</h1>
     <v-form ref="form" v-model="valid" lazy-validation>
       <v-text-field
@@ -104,7 +104,8 @@ export default {
       user: '',
       username: '',
       firstname: '',
-      lastname: ''
+      lastname: '',
+      loginstatus: false,
     };
   },
 
@@ -122,7 +123,11 @@ export default {
       formData.append("username", this.username);
       formData.append("firstname", this.firstname);
       formData.append("lastname", this.lastname);
-      PlugService.insertPlug(formData);
+      PlugService.insertPlug(formData).then(() => {
+        this.$router.push('/')
+      }).catch((err) => {
+        console.log(err)
+      });
     },
     fileChanged() {
       this.file = this.$refs.plug.files[0];
@@ -136,15 +141,23 @@ export default {
   },
 
   async created() {
-    console.log(PlugService.user) // TODO ---> convert lifecycle to simple if else (if user not logged in ( which is when plugservice.user === undefined), push to login)
     try {
-      this.user = await PlugService.getUser();
+      this.user = await PlugService.getUser()
     } catch (err) {
       this.error = err.message;
     } finally {
-      this.username = this.user.username
-      this.firstname = this.user.firstname
-      this.lastname = this.user.lastname
+      if (this.user){
+          PlugService.user = this.user
+          this.loginstatus = true
+          this.username = this.user.username
+          this.owner = this.user.id
+          this.firstname = this.user.firstname
+          this.lastname = this.user.lastname
+          console.log(this.username)
+      }else{
+        this.$router.push('/login')
+      }
+      
     }
   }
 };

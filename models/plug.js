@@ -46,7 +46,10 @@ const postSchema = mongoose.Schema({
     lastname: {
         type: String,
         required: true
-    }
+    },
+    pluggers: [{
+        type: String
+    }]
 });
 
 postSchema.index({ title: 'text', category: 1, details: 'text'});

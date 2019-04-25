@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <v-toolbar app>
+    <v-toolbar app v-if="!['login', 'register'].indexOf($route.name) > -1">
       <v-toolbar-title class="headline text-uppercase">
         <span>Plugger</span>
         <span class="font-weight-light"></span>
@@ -15,13 +15,6 @@
       </v-btn>
       <v-btn
         flat
-        @click="$router.push('myPlugs')"
-        target="_blank"
-      >
-        <span class="mr-2">My Plugs</span>
-      </v-btn>
-      <v-btn
-        flat
         color="indigo"
         @click="$router.push('/')"
         target="_blank"
@@ -29,6 +22,7 @@
         <span class="mr-2">All plugs</span>
       </v-btn>
       <v-btn
+        
         flat
         color="blue"
         @click="logOut"
@@ -36,14 +30,29 @@
       >
         <span class="mr-2">Logout</span>
       </v-btn>
-      <v-btn
-        flat
-        color="blue"
-        @click="$router.push('/userpage')"
-        target="_blank"
-      >
-        <span class="mr-2">Dashboard</span>
-      </v-btn>
+      
+      <div class="text-xs-center">
+    <v-menu offset-y >
+      <template v-slot:activator="{ on }">
+        <v-btn
+          color="primary"
+          dark
+          v-on="on"
+        >
+          {{user.username}}
+        </v-btn>
+      </template>
+      <v-list>
+        <v-list-tile
+          v-for="(item, index) in items"
+          :key="index"
+          @click="pushTo(item.pushto)"
+        >
+          <v-list-tile-title>{{ item.title }}</v-list-tile-title>
+        </v-list-tile>
+      </v-list>
+    </v-menu>
+  </div>
     </v-toolbar>
 
     <v-content>
@@ -62,6 +71,7 @@ import PlugService from './PlugService.js'
 import UserPage from '@/components/UserPage'
 import AddPlugPage from '@/components/AddPlugPage'
 import MyPlugs from '@/components/MyPlugs'
+import SavedPlugsPage from '@/components/SavedPlugsPage'
 
 export default {
   name: 'App',
@@ -71,7 +81,8 @@ export default {
     RegisterPage,
     UserPage,
     AddPlugPage,
-    MyPlugs
+    MyPlugs,
+    SavedPlugsPage
   },
   data() {
     return {
@@ -83,11 +94,19 @@ export default {
       readonly: true,
       loggedIn: false,
       loginstatus: '',
+      items: [
+        { title: 'Profile', pushto: 'userpage' },
+        { title: 'Plugs by me', pushto: 'myPlugs'},
+        { title: 'Saved Plugs', pushto: 'saved' },
+      ]
     };
   },
   methods: {
     readOnly() {
       this.readonly = !this.readonly;
+    },
+    pushTo(location) {
+      this.$router.push(location)
     },
     async logOut() {
       await PlugService.logout().then(() => {
@@ -104,27 +123,9 @@ export default {
       console.log(this.user)
       PlugService.user = this.user
     }
+  },
+  watch(){
+    
   }
-  /* async created() {
-    try {
-      this.loginstatus = await PlugService.checkLogin();
-      this.user = await PlugService.user;
-    } catch (err) {
-      console.log(err);
-      this.error = err.message;
-    } finally {
-      console.log(this.loginstatus.data.passport.user)
-      if (this.loginstatus.data.passport.user !== null || this.loginstatus.data.passport.user !== 'undefined') {
-        console.log(this.loginstatus)
-        this.username = this.user.data.username;
-        this.email = this.user.data.email;
-        this.firstname = this.user.data.firstname;
-        this.lastname = this.user.data.lastname;
-      } else {
-        this.$router.push('/login')
-      }
-      
-    }
-  } */
 }
 </script>

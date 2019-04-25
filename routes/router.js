@@ -4,7 +4,7 @@ const Post = require("../models/plug.js");
 const User = require('../controllers/userController')
 const PostController = require("../controllers/PostController");
 const UserController = require('../controllers/userController');
-const ObjectId = require('mongodb').ObjectId; 
+const ObjectId = require('mongodb').ObjectId;
 const router = express.Router();
 const passport = require('passport')
 const multer = require("multer");
@@ -87,6 +87,7 @@ router.get("/posts", async (req, res) => {
 
 router.get('/myPlugs/:id', async (req, res) => {
   const searchTerm = req.params.id
+  console.log(searchTerm);
   await PostController.find_by_owner(searchTerm)
     .then((post) => {
       res.send(post)
@@ -96,30 +97,38 @@ router.get('/myPlugs/:id', async (req, res) => {
 })
 
 router.post("/gallery/:id", upload.single("Post"), (req, res) => {
+  console.log(req.body)
   const updatedPost = {
     title: req.body.title,
     details: req.body.details,
-    category: req.body.category
+    phone: req.body.phone,
+    location: req.body.location,
+    email: req.body.email,
   };
-  Post.findByIdAndUpdate({ _id: req.params.id }, { $set: updatedPost }).then(
-    () => {
-      PostController.find_all_posts().then(Post => {
-        res.send(Post);
-      });
-    }
-  );
+  Post.findByIdAndUpdate({ _id: req.params.id }, { $set: updatedPost })
+    .then(() => {
+      res.send({success: 'Succesfully updated.'})
+    }).catch((err) => {
+      res.send({error: err})
+    });
 });
 
-router.get('/cookie', function (req, res, next) {
-  if (req.session) {
-    res.send(req.session)
-  } else {
-    res.send({ error: 'User not logged in.' })
-  }
+router.post('/plug/:id', (req, res) => {
+  Post.findOneAndUpdate({ _id: req.body.plugId }, { $push: { pluggers: req.body.userId } })
+  .then(() => {
+    res.send({success: 'Succesfully added to your plugs'})
+  }).catch((err) => {
+    res.send({error: err})
+  });
+})
+
+router.get('/savedplugs/:id', (req, res) => {
+  PostController.find_my_plugs({pluggers: { "$in": [req.params.id]}}).then((post) => {
+    res.send(post);
+  })
 })
 
 router.delete("/gallery/:id", (req, res) => {
-  console.log(req.params.id);
   Post.findOneAndDelete({ _id: req.params.id }).then(() => {
     PostController.find_all_posts()
       .then(post => {
@@ -138,7 +147,6 @@ router.get("/gallery/:id", (req, res) => {
 });
 
 router.get("/search/:searchterm", (req, res) => {
-  console.log(req.params.searchterm)
   if (req.params.searchterm !== "") {
     PostController.Post_search_all(req.params.searchterm)
       .then(post => {
@@ -161,7 +169,6 @@ router.get("/search/:searchterm", (req, res) => {
 //------------- Register - Login - User -------------//
 
 router.post("/authenticate", (req, res, next) => {
-  console.log(req.body)
   passport.authenticate('local', (err, user, info) => {
     if (err) { return next(err) }
     if (!user) {
@@ -170,7 +177,6 @@ router.post("/authenticate", (req, res, next) => {
     }
     req.logIn(user, function (err) {
       if (err) { return next(err); }
-      console.log(user)
       return res.send(user)
     });
   })(req, res, next);
@@ -185,7 +191,6 @@ router.get('/logout', function (req, res) {
 });
 
 router.get('/user', (req, res) => {
-  console.log(req.user)
   res.send(req.user)
 });
 

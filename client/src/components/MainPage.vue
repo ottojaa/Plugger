@@ -1,11 +1,13 @@
 
 <template>
-  <div class="container">
+  <div v-show="loginstatus" class="container">
     <v-card elevation="14">
       <v-card-title class="headline font-weight-regular blue lighten-1 white--text">
         Search
         <v-combobox
           name="searchterm"
+          v-model="testi"
+          value=""
           :items="titles"
           id="searchField"
           persistent-hint
@@ -17,6 +19,9 @@
         </v-combobox>
         <v-btn flat color="black" @click="search">
           <v-icon>search</v-icon>
+        </v-btn>
+        <v-btn flat color="danger" @click="resetSearch">
+          Reset
         </v-btn>
       </v-card-title>
     </v-card>
@@ -32,13 +37,34 @@
         v-bind:key="plug._id"
       >
         <v-card class="ma-2" hover:true>
-          <v-img v-bind:src="'https:/localhost:3000/' + plug.fileName" aspect-ratio="2.75"></v-img>
+          <v-img v-bind:src="'https:/localhost:3000/' + plug.fileName" aspect-ratio="2.75"><template v-slot:placeholder>
+                    <v-layout
+                      fill-height
+                      align-center
+                      justify-center
+                      ma-0
+                    >
+                      <v-progress-circular :size="80" indeterminate color="green"></v-progress-circular>
+                    </v-layout>
+                  </template></v-img>
           <v-card-title primary-title >
-            <div>
               <h3 class="headline mb-0 background">{{plug.title}}</h3>
-              <div>{{plug.details}}</div>
-            </div>
           </v-card-title>
+          <div style="margin-left: 20px">
+            {{plug.details}}
+          </div>
+                <v-list two-line>
+                  <v-list-tile>
+                    <v-list-tile-content>
+                      <v-list-tile-title ><p style="color: #756ac7;">Category</p></v-list-tile-title>
+                      <v-list-tile-sub-title></v-list-tile-sub-title>
+                    </v-list-tile-content>
+                    <v-list-tile-action>
+                      {{plug.category}} 
+                    </v-list-tile-action>
+                  </v-list-tile>
+                  </v-list>
+                  <v-divider></v-divider>
           <v-card-actions>
             <v-btn flat color="purple" @click="getId(index)">View Plug</v-btn>
             <v-spacer></v-spacer>
@@ -52,7 +78,54 @@
                 <div>Plug Creator Info</div>
               </template>
               <v-card>
-                <v-card-text>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</v-card-text>
+                <v-list two-line>
+                  <v-list-tile>
+                    <v-list-tile-avatar>
+                      <img src="https://i.imgur.com/ppqan5G.jpg">
+                    </v-list-tile-avatar>
+                    
+
+                    <v-list-tile-content>
+                      <v-list-tile-title>{{plug.username}}</v-list-tile-title>
+                      <v-list-tile-sub-title>Username</v-list-tile-sub-title>
+                    </v-list-tile-content>
+                    <v-list-tile-action>
+                      <v-icon>arrow_forward_ios</v-icon>
+                    </v-list-tile-action>
+                  </v-list-tile>
+                  
+                  <v-list-tile>
+                    <v-list-tile-action>
+                      <v-icon color="indigo">phone</v-icon>
+                    </v-list-tile-action>
+
+                    <v-list-tile-content>
+                      <v-list-tile-title>{{plug.phone}}</v-list-tile-title>
+                      <v-list-tile-sub-title>Mobile</v-list-tile-sub-title>
+                    </v-list-tile-content>
+                  </v-list-tile>
+                  <v-list-tile>
+                    <v-list-tile-action>
+                      <v-icon color="indigo">mail</v-icon>
+                    </v-list-tile-action>
+
+                    <v-list-tile-content>
+                      <v-list-tile-title>{{plug.email}}</v-list-tile-title>
+                      <v-list-tile-sub-title>Personal</v-list-tile-sub-title>
+                    </v-list-tile-content>
+                  </v-list-tile>
+                  <v-list-tile>
+                    <v-list-tile-action>
+                      <v-icon color="indigo">location_on</v-icon>
+                    </v-list-tile-action>
+
+                    <v-list-tile-content>
+                      <v-list-tile-title>{{plug.location}}</v-list-tile-title>
+                      <v-list-tile-sub-title>Location</v-list-tile-sub-title>
+                    </v-list-tile-content>
+                  </v-list-tile>
+                  
+                </v-list>
               </v-card>
             </v-expansion-panel-content>
           </v-expansion-panel>
@@ -76,6 +149,7 @@ export default {
       plug: "",
       show: [],
       plugs: [],
+      testi: '',
       valid: true,
       select: null,
       items: ["Graphics Design", "Art", "Music", "Programming"],
@@ -88,7 +162,7 @@ export default {
       searchterm: "",
       titles: [],
       plugId: "",
-      loginstatus: '',
+      loginstatus: false,
       user: ''
     };
   },
@@ -108,6 +182,7 @@ export default {
       this.$router.push({ path: "/plug/", query: { plugId: this.plugId } });
     },
     async search() {
+      console.log(this.value)
       this.search = document.getElementById('searchField').value;
       this.plugs = await PlugService.search(this.search); 
       this.search = ''
@@ -120,15 +195,23 @@ export default {
     "upload-btn": UploadButton
   },
 
-  async created() {
-    this.user = await PlugService.getUser()
+  async mounted() {
     try {
-      this.plugs = await PlugService.getPlugs();
-      this.titles = await PlugService.getTitles();
+      this.user = await PlugService.getUser()
     } catch (err) {
       this.error = err.message;
     } finally {
-      console.log(this.titles);
+      if (this.user){
+         PlugService.user = this.user
+         this.plugs = await PlugService.getPlugs();
+         this.titles = await PlugService.getTitles();
+         this.loginstatus = true
+         console.log(this.plugs)
+      }else{
+        this.$router.push('/login')
+      }
+     
+      
     }
   }
 };

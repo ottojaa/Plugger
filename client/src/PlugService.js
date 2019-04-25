@@ -60,6 +60,38 @@ class PlugService {
       }
     })
   }
+  static addToMyPlugs(userId, plugId) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const query = {
+          userId: userId,
+          plugId: plugId
+        }
+        const requestUrl = `${url}${'plug/'}{}`;
+        const res = await axios({
+          method: 'post',
+          url: requestUrl,
+          data: query,
+        })
+        const data = res.data
+        resolve(data)
+      } catch (err) {
+        reject(err)
+      }
+    })
+  }
+  static editPlug(formData, plugId) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const requestUrl = `${url}${'gallery/'}${plugId}`
+        const res = axios.post(requestUrl, formData);
+        const data = res.data
+        resolve(data)
+      } catch(err) {
+        reject(err)
+      }
+    })
+  }
   static search(searchterm) {
     return new Promise(async (resolve, reject) => {
       try {
@@ -94,6 +126,19 @@ class PlugService {
         const requestUrl = `${url}${"gallery/"}${id}`;
         const res = await axios.get(requestUrl);
         const data = res.data;
+        resolve(data);
+      } catch (err) {
+        reject(err);
+      }
+    });
+  }
+  static getSavedPlugs(id) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const requestUrl = `${url}${"savedplugs/"}${id}`;
+        const res = await axios.get(requestUrl);
+        const data = res.data;
+        console.log(data)
         resolve(data);
       } catch (err) {
         reject(err);
@@ -173,7 +218,7 @@ class PlugService {
   }
 
   static deletePlug(id) {
-    return axios.delete(`${url}${id}`);
+    return axios.delete(`${url}${'gallery/'}${id}`);
   }
   static getUser() {
     return new Promise(async (resolve, reject) => {

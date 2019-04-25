@@ -6,14 +6,16 @@ import UserPage from './components/UserPage.vue'
 import MainPage from './components/MainPage.vue'
 import PlugPage from './components/PlugPage.vue'
 import MyPlugs from './components/MyPlugs.vue'
+import SavedPlugsPage from './components/SavedPlugsPage.vue'
 
 export default [
   { path: '/', component: MainPage },
   { path: '/main', component: GalleryPage },
-  { path: '/login', component: LoginPage },
-  { path: '/register', component: RegisterPage },
+  { path: '/login', name: 'login', component: LoginPage },
+  { path: '/register', name: 'register', component: RegisterPage },
   { path: '/userpage', component: UserPage },
   { path: '/addPlug', component: AddPlugPage },
   { path: '/plug', component: PlugPage },
-  { path: '/myPlugs', component: MyPlugs }
+  { path: '/myPlugs', component: MyPlugs },
+  { path: '/saved', component: SavedPlugsPage }
 ]

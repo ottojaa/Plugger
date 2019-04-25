@@ -1,5 +1,5 @@
-<template>
-  <v-container class="main" fill-height fluid grid-list-xl>
+<template >
+  <v-container v-show="loginstatus" class="main" fill-height fluid grid-list-xl>
     <v-layout justify-center wrap>
       <v-flex xs12 md8>
         <v-form :readonly="true">
@@ -55,7 +55,7 @@ export default {
       firstname: "",
       username: "",
       readonly: true,
-      loginstatus: ''
+      loginstatus: false
     };
   },
   methods: {
@@ -65,20 +65,22 @@ export default {
   },
   async created() {
     try {
-      this.loginstatus = await PlugService.checkLogin();
-      this.user = await PlugService.user;
+      this.user = await PlugService.getUser()
     } catch (err) {
-      console.log(err);
       this.error = err.message;
     } finally {
-      console.log(this.loginstatus.data.passport.user)
-      if (this.loginstatus.data.passport.user !== null || this.loginstatus.data.passport.user !== 'undefined') {
-        console.log(this.loginstatus)
-        this.username = this.user.data.username;
-        this.email = this.user.data.email;
-        this.firstname = this.user.data.firstname;
-        this.lastname = this.user.data.lastname;
-      } else {
+      if (this.user){
+        PlugService.user = this.user
+        this.plug = await PlugService.getPlug(this.$route.query.plugId);
+        this.loginstatus = true
+        this.username = this.user.username;
+        this.email = this.user.email;
+        this.firstname = this.user.firstname;
+        this.lastname = this.user.lastname;
+        if (this.plug === this.user.id) {
+          this.ownedByCurrentUser = true
+        }
+      }else{
         this.$router.push('/login')
       }
       

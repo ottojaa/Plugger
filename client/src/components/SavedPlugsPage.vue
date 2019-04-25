@@ -1,10 +1,9 @@
 <template>
-<div class="container">
 <v-layout justify-center row wrap fill-height>
       <v-flex
-        xs2
-        sm3
-        md4
+        xs1
+        sm2
+        md3
         class="margin"
         v-for="(plug, index) in plugs"
         v-bind:item="plug"
@@ -41,10 +40,8 @@
         <v-spacer></v-spacer>
       </v-flex>
     </v-layout>
-    </div>
- </template>
- <script>
-/* eslint-disable */
+  </template>
+  <script>
 import PlugService from "../PlugService.js";
 import UploadButton from "vuetify-upload-button";
 import router from "../routes.js";
@@ -54,49 +51,71 @@ export default {
   data() {
     return {
       plug: "",
-      user: '',
+      show: [],
       plugs: [],
+      testi: '',
+      valid: true,
+      select: null,
       items: ["Graphics Design", "Art", "Music", "Programming"],
+      error: "",
       title: "",
       category: "",
+      plug: "",
       details: "",
       isEditing: false,
-      currentUser: ''
+      searchterm: "",
+      titles: [],
+      plugId: "",
+      loginstatus: false,
+      user: ''
     };
   },
 
   methods: {
+    fileChanged() {
+      this.file = this.$refs.plug.files[0];
+    },
     reset() {
       this.$refs.form.reset();
+    },
+    toggle(index) {
+      this.show, index, !this.show[index]
     },
     getId(index) {
       this.plugId = this.plugs[index]._id;
       this.$router.push({ path: "/plug/", query: { plugId: this.plugId } });
     },
-    delete(index) {
-      this.plugId = this.plugs[index]._id;
-      PlugService.deletePlug(this.plugId)
-      console.log(this.plugs)
+    async search() {
+      console.log(this.value)
+      this.search = document.getElementById('searchField').value;
+      this.plugs = await PlugService.search(this.search); 
+      this.search = ''
+    },
+    async resetSearch() {
+      this.plugs = await PlugService.getPlugs();
     }
   },
   components: {
     "upload-btn": UploadButton
   },
 
-  async created() {
-    
+  async mounted() {
     try {
       this.user = await PlugService.getUser()
     } catch (err) {
       this.error = err.message;
     } finally {
       if (this.user){
-        this.plugs = await PlugService.myPlugs(this.user.username);
-        PlugService.user = this.user
+         PlugService.user = this.user
+         console.log(this.user)
+         this.plugs = await PlugService.getSavedPlugs(this.user.id);
+         console.log(this.plugs)
+         this.titles = await PlugService.getTitles();
       }else{
-        this.$router.push('/login')
+        this.$router.push('/login') 
       }
     }
   }
 };
 </script>
+  
