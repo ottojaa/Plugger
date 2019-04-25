@@ -5,6 +5,7 @@ import RegisterPage from './components/RegisterPage.vue'
 import UserPage from './components/UserPage.vue'
 import MainPage from './components/MainPage.vue'
 import PlugPage from './components/PlugPage.vue'
+import MyPlugs from './components/MyPlugs.vue'
 
 export default [
   { path: '/', component: MainPage },
@@ -13,5 +14,6 @@ export default [
   { path: '/register', component: RegisterPage },
   { path: '/userpage', component: UserPage },
   { path: '/addPlug', component: AddPlugPage },
-  { path: '/plug', component: PlugPage }
+  { path: '/plug', component: PlugPage },
+  { path: '/myPlugs', component: MyPlugs }
 ]

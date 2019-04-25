@@ -100,7 +100,11 @@ export default {
       phone: "",
       email: "",
       location: "",
-      owner: ""
+      owner: "",
+      user: '',
+      username: '',
+      firstname: '',
+      lastname: ''
     };
   },
 
@@ -114,7 +118,10 @@ export default {
       formData.append("email", this.email);
       formData.append("phone", this.phone);
       formData.append("location", this.location);
-      formData.append("owner", this.owner)
+      formData.append("owner", this.owner);
+      formData.append("username", this.username);
+      formData.append("firstname", this.firstname);
+      formData.append("lastname", this.lastname);
       PlugService.insertPlug(formData);
     },
     fileChanged() {
@@ -129,14 +136,15 @@ export default {
   },
 
   async created() {
+    console.log(PlugService.user) // TODO ---> convert lifecycle to simple if else (if user not logged in ( which is when plugservice.user === undefined), push to login)
     try {
-      this.plugs = await PlugService.getPlugs();
-      this.user = await PlugService.user;
+      this.user = await PlugService.getUser();
     } catch (err) {
       this.error = err.message;
     } finally {
-      this.owner = this.user.data._id;
-      console.log(this.owner)
+      this.username = this.user.username
+      this.firstname = this.user.firstname
+      this.lastname = this.user.lastname
     }
   }
 };

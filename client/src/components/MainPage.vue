@@ -1,7 +1,7 @@
 
 <template>
   <div class="container">
-    <v-card>
+    <v-card elevation="14">
       <v-card-title class="headline font-weight-regular blue lighten-1 white--text">
         Search
         <v-combobox
@@ -20,7 +20,7 @@
         </v-btn>
       </v-card-title>
     </v-card>
-    <v-layout align-center justify-center row wrap fill-height>
+    <v-layout justify-center row wrap fill-height>
       <v-flex
         xs2
         sm3
@@ -31,27 +31,31 @@
         v-bind:index="index"
         v-bind:key="plug._id"
       >
-        <v-card class="ma-2" @click="getId(index)">
+        <v-card class="ma-2" hover:true>
           <v-img v-bind:src="'https:/localhost:3000/' + plug.fileName" aspect-ratio="2.75"></v-img>
-          <v-card-title primary-title>
+          <v-card-title primary-title >
             <div>
-              <h3 class="headline mb-0">{{plug.title}}</h3>
+              <h3 class="headline mb-0 background">{{plug.title}}</h3>
               <div>{{plug.details}}</div>
             </div>
           </v-card-title>
-
           <v-card-actions>
-            <v-btn flat color="purple">Hide</v-btn>
+            <v-btn flat color="purple" @click="getId(index)">View Plug</v-btn>
             <v-spacer></v-spacer>
-            <v-btn icon @click="show = !show">
-              <v-icon>{{ show ? 'keyboard_arrow_down' : 'keyboard_arrow_up' }}</v-icon>
-            </v-btn>
           </v-card-actions>
-          <v-slide-y-transition>
-            <v-card-text
-              v-show="show"
-            >"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."</v-card-text>
-          </v-slide-y-transition>
+          <v-expansion-panel
+            expand
+          >
+            <v-expansion-panel-content
+            >
+              <template v-slot:header>
+                <div>Plug Creator Info</div>
+              </template>
+              <v-card>
+                <v-card-text>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</v-card-text>
+              </v-card>
+            </v-expansion-panel-content>
+          </v-expansion-panel>
         </v-card>
         <v-spacer></v-spacer>
       </v-flex>
@@ -70,7 +74,7 @@ export default {
   data() {
     return {
       plug: "",
-      show: false,
+      show: [],
       plugs: [],
       valid: true,
       select: null,
@@ -84,6 +88,8 @@ export default {
       searchterm: "",
       titles: [],
       plugId: "",
+      loginstatus: '',
+      user: ''
     };
   },
 
@@ -93,6 +99,9 @@ export default {
     },
     reset() {
       this.$refs.form.reset();
+    },
+    toggle(index) {
+      this.show, index, !this.show[index]
     },
     getId(index) {
       this.plugId = this.plugs[index]._id;
@@ -112,17 +121,19 @@ export default {
   },
 
   async created() {
+    this.user = await PlugService.getUser()
     try {
       this.plugs = await PlugService.getPlugs();
       this.titles = await PlugService.getTitles();
     } catch (err) {
       this.error = err.message;
     } finally {
-      console.log(this.plugs);
+      console.log(this.titles);
     }
   }
 };
 </script>
 
 <style scoped>
+
 </style>

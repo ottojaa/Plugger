@@ -22,8 +22,8 @@
 
             <v-spacer></v-spacer>
 
-            <v-card-title class="white--text pl-5 pt-5">
-              <div class="display-1 pl-5 pt-5">{{plug.title}}</div>
+            <v-card-title class="white--text pl-5 pt-5" >
+              <div class="display-1 pl-5 pt-5 "><p class="background">{{plug.title}}</p></div>
             </v-card-title>
           </v-layout>
         </v-img>
@@ -55,8 +55,8 @@
             </v-list-tile-action>
 
             <v-list-tile-content>
-              <v-list-tile-title>1400 Main Street</v-list-tile-title>
-              <v-list-tile-sub-title>Orlando, FL 79938</v-list-tile-sub-title>
+              <v-list-tile-title>{{plug.location}}</v-list-tile-title>
+              <v-list-tile-sub-title>Location</v-list-tile-sub-title>
             </v-list-tile-content>
           </v-list-tile>
 
@@ -80,6 +80,9 @@
             </v-list-tile-content>
           </v-list-tile>
         </v-list>
+        <div v-if="!ownedByCurrentUser">
+          <v-btn color="success">Accept plug</v-btn>
+        </div>
       </v-card>
     </v-flex>
   </v-layout>
@@ -94,7 +97,8 @@ export default {
     return {
       plug: "",
       readonly: true,
-      error: ""
+      error: "",
+      ownedByCurrentUser: 'false'
     };
   },
   methods: {
@@ -109,10 +113,16 @@ export default {
     console.log(this.$route.query.plugId);
     try {
       this.plug = await PlugService.getPlug(this.$route.query.plugId);
+      this.user = await PlugService.user;
     } catch (err) {
       this.error = err.message;
     } finally {
-      console.log(this.plug);
+      console.log(this.plug)
+      console.log(this.user.data._id)
+      if (this.plug === this.user.data.id) {
+        this.ownedByCurrentUser = true
+      }
+      
     }
   }
 };
@@ -120,5 +130,8 @@ export default {
 <style scoped>
 .main {
   width: 60%;
+}
+.background{
+  font-weight:bold;
 }
 </style>

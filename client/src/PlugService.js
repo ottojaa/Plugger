@@ -2,12 +2,16 @@
 /* eslint-disable */
 import axios from "axios";
 import router from "./routes";
+const querystring = require('querystring')
 
-
+/* axios.defaults.withCredentials = true; */
 const url = "https://localhost:3000/";
 
 let user = "";
 let plugId = "";
+let loginstatus = "";
+
+axios.defaults.withCredentials = true 
 
 class PlugService {
   static getPlugs() {
@@ -38,6 +42,23 @@ class PlugService {
         reject(err);
       }
     });
+  }
+  static myPlugs(currentUser) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const requestUrl = `${url}${"myPlugs"}`;
+        const res = await axios.get(requestUrl + '/' + currentUser)
+        const data = res.data
+        console.log(res.data)
+        resolve(
+          data.map(plug => ({
+            ...plug,
+          }))
+        );
+      } catch(err) {
+        reject(err)
+      }
+    })
   }
   static search(searchterm) {
     return new Promise(async (resolve, reject) => {
@@ -78,12 +99,6 @@ class PlugService {
         reject(err);
       }
     });
-    /* const requestUrl = `${url}${"gallery/"}${id}`;
-    return axios.get(requestUrl).then(res => {
-      console.log(res);
-    }).catch((err) => {
-      console.log(err)
-    }); */
   }
   static login(formData) {
     const requestUrl = `${url}${"authenticate"}`;
@@ -106,11 +121,11 @@ class PlugService {
     const requestUrl = `${url}${"logout"}`;
     return axios
       .get(requestUrl)
-      .then(res => {
-        console.log(res);
+      .then(response => {
+        console.log(response);
       })
       .catch(err => {
-        res.send(err);
+        console.log(err)
       });
   }
   static register(formData) {
@@ -129,6 +144,32 @@ class PlugService {
       .catch(err => {
         console.log("Cannot register because:", err);
       });
+  }
+  static checkLogin() {
+    const requestUrl = `${url}${"cookie"}`;
+    return axios({
+      method: "get",
+      url: requestUrl,
+      data: {}
+    }).then(response => {
+      return response
+    }).catch(err => {
+      console.log(err)
+    })
+  }
+
+  static getUserById(id) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const requestUrl = `${url}${"user"}`;
+        const res = axios.get(requestUrl)
+        const data = res.data
+        console.log(data)
+        resolve(data)
+      } catch(err) {
+        reject(err)
+      }
+    })
   }
 
   static deletePlug(id) {

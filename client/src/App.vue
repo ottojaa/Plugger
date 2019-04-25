@@ -15,6 +15,13 @@
       </v-btn>
       <v-btn
         flat
+        @click="$router.push('myPlugs')"
+        target="_blank"
+      >
+        <span class="mr-2">My Plugs</span>
+      </v-btn>
+      <v-btn
+        flat
         color="indigo"
         @click="$router.push('/')"
         target="_blank"
@@ -54,6 +61,7 @@ import RegisterPage from '@/components/RegisterPage'
 import PlugService from './PlugService.js'
 import UserPage from '@/components/UserPage'
 import AddPlugPage from '@/components/AddPlugPage'
+import MyPlugs from '@/components/MyPlugs'
 
 export default {
   name: 'App',
@@ -63,6 +71,7 @@ export default {
     RegisterPage,
     UserPage,
     AddPlugPage,
+    MyPlugs
   },
   data() {
     return {
@@ -73,6 +82,7 @@ export default {
       username: "",
       readonly: true,
       loggedIn: false,
+      loginstatus: '',
     };
   },
   methods: {
@@ -87,21 +97,34 @@ export default {
   },
   async created() {
     try {
-      this.user = await PlugService.getUser();
+      this.user = await PlugService.getUser()
+    } catch (err) {
+      this.error = err.message;
+    } finally {
+      console.log(this.user)
+      PlugService.user = this.user
+    }
+  }
+  /* async created() {
+    try {
+      this.loginstatus = await PlugService.checkLogin();
+      this.user = await PlugService.user;
     } catch (err) {
       console.log(err);
       this.error = err.message;
     } finally {
-      this.username = this.user.data.username;
-      this.email = this.user.data.email;
-      this.firstname = this.user.data.firstname;
-      this.lastname = this.user.data.lastname;
-      if (this.username !== 'undefined' || this.username === '') {
-        this.loggedIn = true
-        console.log(this.loggedIn)
+      console.log(this.loginstatus.data.passport.user)
+      if (this.loginstatus.data.passport.user !== null || this.loginstatus.data.passport.user !== 'undefined') {
+        console.log(this.loginstatus)
+        this.username = this.user.data.username;
+        this.email = this.user.data.email;
+        this.firstname = this.user.data.firstname;
+        this.lastname = this.user.data.lastname;
+      } else {
+        this.$router.push('/login')
       }
-      console.log(this.user)
+      
     }
-  }
+  } */
 }
 </script>

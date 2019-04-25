@@ -2,7 +2,7 @@
 <template>
   <div class="container">
     <h1>{{user.data.email}}</h1>
-    <v-card>
+    <v-card  height='100%'>
       <v-card-title class="headline font-weight-regular blue lighten-1 white--text">
         Search
         <v-spacer></v-spacer>
@@ -103,6 +103,7 @@ export default {
   },
 
   async created() {
+    
     try {
       this.plugs = await PlugService.getPlugs();
       this.titles = await PlugService.getTitles();

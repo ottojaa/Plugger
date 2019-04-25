@@ -1,11 +1,13 @@
 const express = require("express");
 const moment = require("moment");
 const Post = require("../models/plug.js");
+const User = require('../controllers/userController')
 const PostController = require("../controllers/PostController");
+const UserController = require('../controllers/userController');
+const ObjectId = require('mongodb').ObjectId; 
 const router = express.Router();
 const passport = require('passport')
 const multer = require("multer");
-const User = require('../models/user');
 const sharp = require("sharp");
 
 const storage = multer.diskStorage({
@@ -18,6 +20,8 @@ const storage = multer.diskStorage({
     callback(null, file.originalname);
   }
 });
+
+
 
 
 const upload = multer({
@@ -44,7 +48,10 @@ router.post("/", upload.single("plug"), async (req, res) => {
     owner: req.body.owner,
     phone: req.body.phone,
     location: req.body.location,
-    email: req.body.email
+    email: req.body.email,
+    username: req.body.username,
+    firstname: req.body.firstname,
+    lastname: req.body.lastname
   });
   await post
     .save()
@@ -63,7 +70,6 @@ router.post("/", upload.single("plug"), async (req, res) => {
 });
 
 router.get("/gallery", async (req, res) => {
-  console.log(req.session.username);
   await PostController.find_all_posts()
     .then(post => {
       res.send(post);
@@ -79,6 +85,16 @@ router.get("/posts", async (req, res) => {
   });
 });
 
+router.get('/myPlugs/:id', async (req, res) => {
+  const searchTerm = req.params.id
+  await PostController.find_by_owner(searchTerm)
+    .then((post) => {
+      res.send(post)
+    }).catch(err => {
+      console.log(err);
+    })
+})
+
 router.post("/gallery/:id", upload.single("Post"), (req, res) => {
   const updatedPost = {
     title: req.body.title,
@@ -93,6 +109,14 @@ router.post("/gallery/:id", upload.single("Post"), (req, res) => {
     }
   );
 });
+
+router.get('/cookie', function (req, res, next) {
+  if (req.session) {
+    res.send(req.session)
+  } else {
+    res.send({ error: 'User not logged in.' })
+  }
+})
 
 router.delete("/gallery/:id", (req, res) => {
   console.log(req.params.id);
@@ -131,7 +155,7 @@ router.get("/search/:searchterm", (req, res) => {
       .catch(err => {
         console.log(err);
       });
-    }
+  }
 });
 
 //------------- Register - Login - User -------------//
@@ -142,36 +166,34 @@ router.post("/authenticate", (req, res, next) => {
     if (err) { return next(err) }
     if (!user) {
       console.log(user)
-      return res.send({error: "Invalid login credentials"})
+      return res.send({ error: "Invalid login credentials" })
     }
-    req.logIn(user, function(err) {
+    req.logIn(user, function (err) {
       if (err) { return next(err); }
       console.log(user)
       return res.send(user)
     });
   })(req, res, next);
 });
-router.get('/logout', function(req, res) {
-  req.logout();
-  return res.send("Logged out succesfully");
+
+router.get('/logout', function (req, res) {
+  req.session.destroy(function (err) {
+    res.clearCookie('connect.sid');
+    req.logout();
+    res.send('Logged out succesfully')
+  });
 });
 
 router.get('/user', (req, res) => {
-  function isAuthenticated(req, res, next) {
-    console.log(req.user)
-    if (req.user) {
-      return next();
-    }
-    res.redirect('/login');
-  }
-  return res.send(req.user);
+  console.log(req.user)
+  res.send(req.user)
 });
 
 router.post("/register", (req, res) => {
   const password = req.body.password;
   const passwordAgain = req.body.passwordAgain;
 
-  if (password == passwordAgain){
+  if (password == passwordAgain) {
     const newUser = new User({
       username: req.body.username,
       email: req.body.email,
@@ -180,11 +202,11 @@ router.post("/register", (req, res) => {
       lastname: req.body.lastname
     });
 
-    User.createUser(newUser, function(err, user){
-      if(err) throw err;
+    User.createUser(newUser, function (err, user) {
+      if (err) throw err;
       res.send(user).end()
     });
-  } else{
+  } else {
     res.status(500).send("{errors: \"Passwords don't match\"}").end()
   }
 });

@@ -54,7 +54,8 @@ export default {
       lastname: "",
       firstname: "",
       username: "",
-      readonly: true
+      readonly: true,
+      loginstatus: ''
     };
   },
   methods: {
@@ -64,16 +65,23 @@ export default {
   },
   async created() {
     try {
+      this.loginstatus = await PlugService.checkLogin();
       this.user = await PlugService.user;
     } catch (err) {
       console.log(err);
       this.error = err.message;
     } finally {
-      this.username = this.user.data.username;
-      this.email = this.user.data.email;
-      this.firstname = this.user.data.firstname;
-      this.lastname = this.user.data.lastname;
-      console.log(this.user)
+      console.log(this.loginstatus.data.passport.user)
+      if (this.loginstatus.data.passport.user !== null || this.loginstatus.data.passport.user !== 'undefined') {
+        console.log(this.loginstatus)
+        this.username = this.user.data.username;
+        this.email = this.user.data.email;
+        this.firstname = this.user.data.firstname;
+        this.lastname = this.user.data.lastname;
+      } else {
+        this.$router.push('/login')
+      }
+      
     }
   }
 };

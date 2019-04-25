@@ -34,6 +34,18 @@ const postSchema = mongoose.Schema({
     location: {
         type: String,
         required: true
+    },
+    username: {
+        type: String,
+        required: true
+    },
+    firstname: {
+        type: String,
+        required: true
+    },
+    lastname: {
+        type: String,
+        required: true
     }
 });
 

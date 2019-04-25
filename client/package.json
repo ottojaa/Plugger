@@ -43,6 +43,7 @@
     "parserOptions": {
       "parser": "babel-eslint"
     }
+    
   },
   "postcss": {
     "plugins": {

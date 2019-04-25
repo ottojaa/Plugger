@@ -22,19 +22,38 @@ const options = {
   cert: sslcert
 };
 const app = express();
+app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(
   bodyParser.urlencoded({
     extended: false
   })
 );
-app.use(cookieParser());
+passport.serializeUser(function(user, done) {
+  console.log('KASMO')
+  done(null, user._id);
+});
 
+passport.deserializeUser(function(id, done) {
+  User.findById(id, function(err, user) {
+    done(err, user);
+  });
+});
+app.use(
+  expressSession({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    
+    /* store: new MongoStore({ mongooseConnection: mongoose.connection }) */
+  })
+);
 app.use(passport.initialize());
 app.use(passport.session());
 passport.use(
   new LocalStrategy(function(username, password, done) {
     User.getUserByUsername(username, function(err, user) {
+      console.log(username)
       if (err) throw err;
       if (!user) {
         return done(null, false, { message: "Unknown User" });
@@ -50,18 +69,11 @@ passport.use(
     });
   })
 );
-passport.serializeUser(function(user, done) {
-  done(null, user._id);
-});
 
-passport.deserializeUser(function(id, done) {
-  User.findById(id, function(err, user) {
-    done(err, user);
-  });
-});
 app.use(function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Origin", "http://localhost:8080");
   res.header('Access-Control-Allow-Methods', 'DELETE, PUT');
+  res.header('Access-Control-Allow-Credentials', 'true')
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   if ('OPTIONS' == req.method) {
      res.sendStatus(200);
@@ -69,16 +81,11 @@ app.use(function(req, res, next) {
    else {
      next();
    }});
-app.use(cors());
-app.use(
-  expressSession({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    store: new MongoStore({ mongooseConnection: mongoose.connection })
-  })
-);
-
+const corsOptions = {
+    credentials: true,
+    origin: 'http://localhost:8080'
+}
+app.use(cors(corsOptions));
 app.use(express.static(__dirname + "/public"));
 app.use(express.static(__dirname + "/public/small"));
 app.use(express.static("uploads"));
@@ -98,7 +105,7 @@ mongoose
   .catch(e => {
     console.log("Connection to db failed because:", e);
   });
-app.use(function(req, res, next) {
+/* app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.setHeader(
     "Access-Control-Allow-Methods",
@@ -109,13 +116,8 @@ app.use(function(req, res, next) {
     "Origin, X-Requested-With, Content-Type, Accept"
   );
   next();
-});
-app.use("/", function(req, res, next) {
-  if (req.isAuthenticated()) {
-    console.log(res);
-  }
-  next();
-});
+}); */
+
 app.use("/", router);
 
 function appListen() {
