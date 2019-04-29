@@ -81,7 +81,6 @@
 /* eslint-disable */
 import PlugService from "../PlugService.js";
 import UploadButton from "vuetify-upload-button";
-
 export default {
   name: "PlugComponent",
   data() {
@@ -108,7 +107,6 @@ export default {
       loginstatus: false,
     };
   },
-
   methods: {
     submitPlug() {
       let formData = new FormData();
@@ -139,7 +137,6 @@ export default {
   components: {
     "upload-btn": UploadButton
   },
-
   async created() {
     try {
       this.user = await PlugService.getUser()
@@ -196,7 +193,6 @@ div.post {
   padding: 10px 10px 30px 10px;
   margin-bottom: 15px;
 }
-
 div.created-at {
   position: absolute;
   top: 0;
@@ -206,7 +202,6 @@ div.created-at {
   color: white;
   font-size: 13px;
 }
-
 p.text {
   font-size: 22px;
   font-weight: 700;

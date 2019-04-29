@@ -2,25 +2,15 @@ require("dotenv").config();
 const bodyParser = require("body-parser");
 const express = require("express");
 const mongoose = require("mongoose");
-const https = require("https");
-const http = require("http");
 const path = require("path");
-const fs = require("fs");
 const cors = require("cors");
-const router = require("./routes/router.js");
+const router = require("./routes/router");
 const expressSession = require("express-session");
 const cookieParser = require("cookie-parser");
 const passport = require("passport");
 const User = require("./models/user");
-const sslkey = fs.readFileSync("ssl-key.pem");
-const sslcert = fs.readFileSync("ssl-cert.pem");
 const LocalStrategy = require("passport-local").Strategy;
-const MongoStore = require("connect-mongo")(expressSession);
-
-const options = {
-  key: sslkey,
-  cert: sslcert
-};
+const helmet = require('helmet');
 const app = express();
 app.use(cookieParser());
 app.use(bodyParser.json());
@@ -29,13 +19,12 @@ app.use(
     extended: false
   })
 );
-passport.serializeUser(function(user, done) {
-  console.log('KASMO')
+passport.serializeUser(function (user, done) {
   done(null, user._id);
 });
 
-passport.deserializeUser(function(id, done) {
-  User.findById(id, function(err, user) {
+passport.deserializeUser(function (id, done) {
+  User.findById(id, function (err, user) {
     done(err, user);
   });
 });
@@ -44,21 +33,19 @@ app.use(
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    
-    /* store: new MongoStore({ mongooseConnection: mongoose.connection }) */
   })
 );
 app.use(passport.initialize());
 app.use(passport.session());
 passport.use(
-  new LocalStrategy(function(username, password, done) {
-    User.getUserByUsername(username, function(err, user) {
+  new LocalStrategy(function (username, password, done) {
+    User.getUserByUsername(username, function (err, user) {
       console.log(username)
       if (err) throw err;
       if (!user) {
         return done(null, false, { message: "Unknown User" });
       }
-      User.comparePassword(password, user.password, function(err, isMatch) {
+      User.comparePassword(password, user.password, function (err, isMatch) {
         if (err) throw err;
         if (isMatch) {
           return done(null, user);
@@ -70,21 +57,22 @@ passport.use(
   })
 );
 
-app.use(function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "http://localhost:8080");
-  res.header('Access-Control-Allow-Methods', 'DELETE, PUT');
-  res.header('Access-Control-Allow-Credentials', 'true')
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+app.use(function (req, res, next) {
+  res.setHeader("Access-Control-Allow-Origin", 'http://localhost:8080');
+  res.setHeader('Access-Control-Allow-Methods', 'DELETE, PUT');
+  res.setHeader('Access-Control-Allow-Credentials', 'true')
+  res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   if ('OPTIONS' == req.method) {
-     res.sendStatus(200);
-   }
-   else {
-     next();
-   }});
+    res.sendStatus(200);
+  }
+  else {
+    next();
+  }
+}); 
 const corsOptions = {
-    credentials: true,
-    origin: 'http://localhost:8080'
+  origin: 'http://localhost:8080'
 }
+app.use(helmet());
 app.use(cors(corsOptions));
 app.use(express.static(__dirname + "/public"));
 app.use(express.static(__dirname + "/public/small"));
@@ -92,40 +80,17 @@ app.use(express.static("uploads"));
 app.set("views", path.join(__dirname, "/views/"));
 
 mongoose
-  .connect(
-    `mongodb://${process.env.DB_USER}:${process.env.DB_PASS}@${
-      process.env.DB_HOST
-    }:${process.env.DB_PORT}/plugger?authSource=admin`,
+  .connect(process.env.MONGODB_URI || `mongodb://${process.env.DB_USER}:${process.env.DB_PASS}@${process.env.DB_HOST}:${process.env.DB_PORT}/plugger?authSource=admin`,
     { useNewUrlParser: true }
   )
   .then(() => {
     console.log("Connection established to db");
+    app.listen(process.env.PORT || 3000, () => {
+      console.log('Connected');
+    })
   })
-  .then(() => appListen())
-  .catch(e => {
-    console.log("Connection to db failed because:", e);
-  });
-/* app.use(function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.setHeader(
-    "Access-Control-Allow-Methods",
-    "GET, POST, OPTIONS, PUT, PATCH, DELETE"
-  );
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept"
-  );
-  next();
-}); */
+  .catch (e => {
+  console.log("Connection to db failed because:", e);
+});
 
 app.use("/", router);
-
-function appListen() {
-  https.createServer(options, app).listen(3000);
-  http
-    .createServer((req, res) => {
-      res.writeHead(301, { Location: "https://localhost:3000" + req.url });
-      res.end();
-    })
-    .listen(8001);
-}

@@ -4,14 +4,12 @@ import axios from "axios";
 import router from "./routes";
 const querystring = require('querystring')
 
-/* axios.defaults.withCredentials = true; */
-const url = "https://localhost:3000/";
+ axios.defaults.withCredentials = true; 
+const url = "https://pluggerexpress.herokuapp.com/";
 
 let user = "";
 let plugId = "";
 let loginstatus = "";
-
-axios.defaults.withCredentials = true 
 
 class PlugService {
   static getPlugs() {
@@ -184,7 +182,6 @@ class PlugService {
     })
       .then(response => {
         console.log(response);
-        router.push("/dashboard");
       })
       .catch(err => {
         console.log("Cannot register because:", err);
@@ -192,6 +189,19 @@ class PlugService {
   }
   static checkLogin() {
     const requestUrl = `${url}${"cookie"}`;
+    return axios({
+      method: "get",
+      url: requestUrl,
+      data: {}
+    }).then(response => {
+      return response
+    }).catch(err => {
+      console.log(err)
+    })
+  }
+
+  static getUsersas() {
+    const requestUrl = `${url}${"user"}`;
     return axios({
       method: "get",
       url: requestUrl,

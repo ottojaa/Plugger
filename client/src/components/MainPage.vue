@@ -37,7 +37,7 @@
         v-bind:key="plug._id"
       >
         <v-card class="ma-2" hover:true>
-          <v-img v-bind:src="'https:/localhost:3000/' + plug.fileName" aspect-ratio="2.75"><template v-slot:placeholder>
+          <v-img v-bind:src="'https://pluggerexpress.herokuapp.com/' + plug.fileName" aspect-ratio="2.75"><template v-slot:placeholder>
                     <v-layout
                       fill-height
                       align-center
@@ -195,7 +195,7 @@ export default {
     "upload-btn": UploadButton
   },
 
-  async mounted() {
+  async created() {
     try {
       this.user = await PlugService.getUser()
     } catch (err) {
@@ -206,12 +206,11 @@ export default {
          this.plugs = await PlugService.getPlugs();
          this.titles = await PlugService.getTitles();
          this.loginstatus = true
-         console.log(this.plugs)
+         console.log(this.user)
       }else{
+        console.log(this.user)
         this.$router.push('/login')
       }
-     
-      
     }
   }
 };
