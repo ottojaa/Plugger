@@ -5,19 +5,20 @@
     class="container"
   >
     <v-card elevation="14">
-      <v-card-title class="headline font-weight-regular blue lighten-1 white--text">
-        Search
-        <form @submit.prevent="search">
-          <label>
-            
-            <input
-              type="text"
-              v-model="value"
-              placeholder="Enter text to search"
-            />
-          </label>
-          <button type="submit">Submit</button>
-        </form>
+      <v-card-title class="headline font-weight-regular pink accent-3 white--text center">
+        <v-form
+          ref="form"
+          class="form white--text"
+          @submit="validate"
+        >
+          <v-text-field
+            v-model="value"
+            label="Search"
+            class="white--text"
+            required
+          ></v-text-field>
+          <v-btn @click="validate">submit</v-btn>
+        </v-form>
       </v-card-title>
     </v-card>
     <v-alert
@@ -173,7 +174,7 @@ export default {
       testi: "",
       valid: true,
       select: null,
-      value: '',
+      value: "",
       items: ["Graphics Design", "Art", "Music", "Programming"],
       error: "",
       title: "",
@@ -203,10 +204,14 @@ export default {
       this.plugId = this.plugs[index]._id;
       this.$router.push({ path: "/plug/", query: { plugId: this.plugId } });
     },
+    async validate() {
+      if (this.$refs.form.validate()) {
+        this.plugs = await PlugService.search(this.value);
+        this.$refs.form.reset();
+      }
+    },
     async search() {
-      console.log(this.value)
-      this.plugs = await PlugService.search(this.value);
-      this.search = "";
+      console.log(this.value);
     },
     async resetSearch() {
       this.plugs = await PlugService.getPlugs();
@@ -236,4 +241,16 @@ export default {
 </script>
 
 <style scoped>
+.form {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 90%;
+}
+.center {
+  justify-content: center;
+}
+.v-text-field__slot{
+  color: white;
+}
 </style>
