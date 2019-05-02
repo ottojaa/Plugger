@@ -1,7 +1,15 @@
 <template >
-  <div v-show="loginstatus" class="container">
+  <div
+    v-show="loginstatus"
+    class="container"
+  >
     <h1>Create a new plug</h1>
-    <v-form ref="form" v-model="valid" lazy-validation>
+    <v-form
+      ref="form"
+      id="form"
+      v-model="valid"
+      lazy-validation
+    >
       <v-text-field
         v-model="title"
         ref="title"
@@ -27,53 +35,51 @@
         label="Category"
         required
       ></v-select>
-      <h1 style="margin-top: 40px">Contact Information</h1>
-      <v-list two-line>
-        <v-list-tile>
-          <v-list-tile-action>
-            <v-icon color="indigo">mail</v-icon>
-          </v-list-tile-action>
-
-          <v-list-tile-content>
-            <v-list-tile-title>Email</v-list-tile-title>
-            <v-list-tile-sub-title>
-              <v-text-field v-model="email" name="email">kasjd</v-text-field>
-            </v-list-tile-sub-title>
-          </v-list-tile-content>
-        </v-list-tile>
-        <v-list-tile>
-          <v-list-tile-action>
-            <v-icon color="indigo">phone</v-icon>
-          </v-list-tile-action>
-
-          <v-list-tile-content>
-            <v-list-tile-title>Phone</v-list-tile-title>
-            <v-list-tile-sub-title>
-              <v-text-field v-model="phone" name="phone">kasjd</v-text-field>
-            </v-list-tile-sub-title>
-          </v-list-tile-content>
-        </v-list-tile>
-        <v-list-tile>
-          <v-list-tile-action>
-            <v-icon color="indigo">location_on</v-icon>
-          </v-list-tile-action>
-
-          <v-list-tile-content>
-            <v-list-tile-title>Location</v-list-tile-title>
-            <v-list-tile-sub-title>
-              <v-text-field v-model="location" name="location">kasjd</v-text-field>
-            </v-list-tile-sub-title>
-          </v-list-tile-content>
-        </v-list-tile>
-      </v-list>
-
-      <v-btn color="primary" @click="$refs.plug.click()">Choose files</v-btn>
-      <input v-show="false" id="plug" ref="plug" type="file" name="plug" @change="fileChanged">
-      <v-btn :disabled="!valid" color="success" @click="submitPlug">Post plug</v-btn>
-      <v-btn color="error" @click="reset">Reset Form</v-btn>
+      <div class="flex">
+        <v-btn
+          v-if="!imagePreview"
+          color="primary"
+          @click="$refs.plug.click()"
+        >Choose Banner Image</v-btn>
+        <input
+          v-show="false"
+          id="plug"
+          ref="plug"
+          type="file"
+          name="plug"
+          @change="fileChanged"
+        >
+        <v-btn
+          v-if="imagePreview"
+          @click="removePreview()"
+        >Remove Banner
+        </v-btn>
+        <v-btn
+          :disabled="!valid"
+          color="success"
+          @click="submitPlug"
+        >Post plug</v-btn>
+        <v-btn
+          color="error"
+          @click="reset"
+        >Reset Form</v-btn>
+      </div>
     </v-form>
-    <hr>
-    <p class="error" v-if="error">{{error}}</p>
+    <v-alert
+      v-if="error"
+      :value="true"
+      type="error"
+      dismissible
+      transition="scale-transition"
+    >
+      {{error}}
+    </v-alert>
+    <div id="preview">
+      <v-img
+        :src="imagePreview"
+        aspect-ratio="2.75"
+      ></v-img>
+    </div>
   </div>
 </template>
 
@@ -100,11 +106,13 @@ export default {
       email: "",
       location: "",
       owner: "",
-      user: '',
-      username: '',
-      firstname: '',
-      lastname: '',
+      user: "",
+      username: "",
+      firstname: "",
+      lastname: "",
       loginstatus: false,
+      error: "",
+      imagePreview: ""
     };
   },
   methods: {
@@ -121,14 +129,29 @@ export default {
       formData.append("username", this.username);
       formData.append("firstname", this.firstname);
       formData.append("lastname", this.lastname);
-      PlugService.insertPlug(formData).then(() => {
-        this.$router.push('/')
-      }).catch((err) => {
-        console.log(err)
-      });
+      PlugService.insertPlug(formData)
+        .then(response => {
+          console.log(response);
+          if (response.data.error) {
+            this.error = response.data.error;
+          } else {
+            this.$router.push({
+              name: "main",
+              params: { status: response.data.status }
+            });
+          }
+        })
+        .catch(err => {
+          console.log(err);
+        });
     },
     fileChanged() {
       this.file = this.$refs.plug.files[0];
+      this.imagePreview = URL.createObjectURL(this.file);
+    },
+    removePreview() {
+      this.file = "";
+      this.imagePreview = "";
     },
     reset() {
       this.$refs.form.reset();
@@ -139,22 +162,24 @@ export default {
   },
   async created() {
     try {
-      this.user = await PlugService.getUser()
+      this.user = await PlugService.getUser();
     } catch (err) {
       this.error = err.message;
     } finally {
-      if (this.user){
-          PlugService.user = this.user
-          this.loginstatus = true
-          this.username = this.user.username
-          this.owner = this.user.id
-          this.firstname = this.user.firstname
-          this.lastname = this.user.lastname
-          console.log(this.username)
-      }else{
-        this.$router.push('/login')
+      if (this.user) {
+        PlugService.user = this.user;
+        this.loginstatus = true;
+        this.username = this.user.username;
+        this.owner = this.user.id;
+        this.email = this.user.email;
+        this.phone = this.user.phone;
+        this.location = this.user.location;
+        this.firstname = this.user.firstname;
+        this.lastname = this.user.lastname;
+        console.log(this.username);
+      } else {
+        this.$router.push("/login");
       }
-      
     }
   }
 };
@@ -206,5 +231,9 @@ p.text {
   font-size: 22px;
   font-weight: 700;
   margin-bottom: 0;
+}
+.flex {
+  display: flex;
+  justify-content: center;
 }
 </style>

@@ -1,31 +1,40 @@
 
 <template>
-  <div v-show="loginstatus" class="container">
+  <div
+    v-show="loginstatus"
+    class="container"
+  >
     <v-card elevation="14">
       <v-card-title class="headline font-weight-regular blue lighten-1 white--text">
         Search
-        <v-combobox
-          name="searchterm"
-          v-model="testi"
-          value=""
-          :items="titles"
-          id="searchField"
-          persistent-hint
-          prepend-icon="mdi-city"
-        >
-          <template v-slot:append-outer>
-            <v-slide-x-reverse-transition mode="out-in"></v-slide-x-reverse-transition>
-          </template>
-        </v-combobox>
-        <v-btn flat color="black" @click="search">
-          <v-icon>search</v-icon>
-        </v-btn>
-        <v-btn flat color="danger" @click="resetSearch">
-          Reset
-        </v-btn>
+        <form @submit.prevent="search">
+          <label>
+            
+            <input
+              type="text"
+              v-model="value"
+              placeholder="Enter text to search"
+            />
+          </label>
+          <button type="submit">Submit</button>
+        </form>
       </v-card-title>
     </v-card>
-    <v-layout justify-center row wrap fill-height>
+    <v-alert
+      v-if="$route.params.status"
+      :value="true"
+      type="success"
+      dismissible
+      transition="scale-transition"
+    >
+      {{$route.params.status}}
+    </v-alert>
+    <v-layout
+      justify-center
+      row
+      wrap
+      fill-height
+    >
       <v-flex
         xs2
         sm3
@@ -36,44 +45,57 @@
         v-bind:index="index"
         v-bind:key="plug._id"
       >
-        <v-card class="ma-2" hover:true>
-          <v-img v-bind:src="'https://pluggerexpress.herokuapp.com/' + plug.fileName" aspect-ratio="2.75"><template v-slot:placeholder>
-                    <v-layout
-                      fill-height
-                      align-center
-                      justify-center
-                      ma-0
-                    >
-                      <v-progress-circular :size="80" indeterminate color="green"></v-progress-circular>
-                    </v-layout>
-                  </template></v-img>
-          <v-card-title primary-title >
-              <h3 class="headline mb-0 background">{{plug.title}}</h3>
+        <v-card
+          class="ma-2"
+          hover:true
+        >
+          <v-img
+            v-bind:src="'https://pluggerexpress.herokuapp.com/' + plug.fileName"
+            aspect-ratio="2.75"
+          ><template v-slot:placeholder>
+              <v-layout
+                fill-height
+                align-center
+                justify-center
+                ma-0
+              >
+                <v-progress-circular
+                  :size="80"
+                  indeterminate
+                  color="green"
+                ></v-progress-circular>
+              </v-layout>
+            </template></v-img>
+          <v-card-title primary-title>
+            <h3 class="headline mb-0 background">{{plug.title}}</h3>
           </v-card-title>
           <div style="margin-left: 20px">
             {{plug.details}}
           </div>
-                <v-list two-line>
-                  <v-list-tile>
-                    <v-list-tile-content>
-                      <v-list-tile-title ><p style="color: #756ac7;">Category</p></v-list-tile-title>
-                      <v-list-tile-sub-title></v-list-tile-sub-title>
-                    </v-list-tile-content>
-                    <v-list-tile-action>
-                      {{plug.category}} 
-                    </v-list-tile-action>
-                  </v-list-tile>
-                  </v-list>
-                  <v-divider></v-divider>
+          <v-list two-line>
+            <v-list-tile>
+              <v-list-tile-content>
+                <v-list-tile-title>
+                  <p style="color: #756ac7;">Category</p>
+                </v-list-tile-title>
+                <v-list-tile-sub-title></v-list-tile-sub-title>
+              </v-list-tile-content>
+              <v-list-tile-action>
+                {{plug.category}}
+              </v-list-tile-action>
+            </v-list-tile>
+          </v-list>
+          <v-divider></v-divider>
           <v-card-actions>
-            <v-btn flat color="purple" @click="getId(index)">View Plug</v-btn>
+            <v-btn
+              flat
+              color="purple"
+              @click="getId(index)"
+            >View Plug</v-btn>
             <v-spacer></v-spacer>
           </v-card-actions>
-          <v-expansion-panel
-            expand
-          >
-            <v-expansion-panel-content
-            >
+          <v-expansion-panel expand>
+            <v-expansion-panel-content>
               <template v-slot:header>
                 <div>Plug Creator Info</div>
               </template>
@@ -83,7 +105,6 @@
                     <v-list-tile-avatar>
                       <img src="https://i.imgur.com/ppqan5G.jpg">
                     </v-list-tile-avatar>
-                    
 
                     <v-list-tile-content>
                       <v-list-tile-title>{{plug.username}}</v-list-tile-title>
@@ -93,7 +114,7 @@
                       <v-icon>arrow_forward_ios</v-icon>
                     </v-list-tile-action>
                   </v-list-tile>
-                  
+
                   <v-list-tile>
                     <v-list-tile-action>
                       <v-icon color="indigo">phone</v-icon>
@@ -124,7 +145,7 @@
                       <v-list-tile-sub-title>Location</v-list-tile-sub-title>
                     </v-list-tile-content>
                   </v-list-tile>
-                  
+
                 </v-list>
               </v-card>
             </v-expansion-panel-content>
@@ -149,9 +170,10 @@ export default {
       plug: "",
       show: [],
       plugs: [],
-      testi: '',
+      testi: "",
       valid: true,
       select: null,
+      value: '',
       items: ["Graphics Design", "Art", "Music", "Programming"],
       error: "",
       title: "",
@@ -163,7 +185,7 @@ export default {
       titles: [],
       plugId: "",
       loginstatus: false,
-      user: ''
+      user: ""
     };
   },
 
@@ -175,7 +197,7 @@ export default {
       this.$refs.form.reset();
     },
     toggle(index) {
-      this.show, index, !this.show[index]
+      this.show, index, !this.show[index];
     },
     getId(index) {
       this.plugId = this.plugs[index]._id;
@@ -183,9 +205,8 @@ export default {
     },
     async search() {
       console.log(this.value)
-      this.search = document.getElementById('searchField').value;
-      this.plugs = await PlugService.search(this.search); 
-      this.search = ''
+      this.plugs = await PlugService.search(this.value);
+      this.search = "";
     },
     async resetSearch() {
       this.plugs = await PlugService.getPlugs();
@@ -197,19 +218,17 @@ export default {
 
   async created() {
     try {
-      this.user = await PlugService.getUser()
+      this.user = await PlugService.getUser();
     } catch (err) {
       this.error = err.message;
     } finally {
-      if (this.user){
-         PlugService.user = this.user
-         this.plugs = await PlugService.getPlugs();
-         this.titles = await PlugService.getTitles();
-         this.loginstatus = true
-         console.log(this.user)
-      }else{
-        console.log(this.user)
-        this.$router.push('/login')
+      if (this.user) {
+        PlugService.user = this.user;
+        this.plugs = await PlugService.getPlugs();
+        this.titles = await PlugService.getTitles();
+        this.loginstatus = true;
+      } else {
+        this.$router.push("/login");
       }
     }
   }
@@ -217,5 +236,4 @@ export default {
 </script>
 
 <style scoped>
-
 </style>

@@ -132,14 +132,12 @@ export default {
     } finally {
       if (this.user) {
         PlugService.user = this.user;
-        console.log(this.user);
         this.plugs = await PlugService.getSavedPlugs(this.user.id);
         if (this.plugs.length === 0) {
           this.noPlugs = false;
         } else {
           this.noPlugs = true;
         }
-        console.log(this.plugs);
         this.titles = await PlugService.getTitles();
       } else {
         this.$router.push("/login");

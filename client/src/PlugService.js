@@ -104,18 +104,19 @@ class PlugService {
     });
   }
   static insertPlug(plug) {
-    console.log(plug, "HHHAAAAA????");
     return axios({
       method: "post",
       url: url,
       data: plug,
       headers: { "Content-Type": "multipart/form-data" }
     })
-      .then(function(response) {
-        console.log(response);
+      .then((response) => {
+        console.log(response)
+        return response
       })
-      .catch(function(response) {
-        console.log(response);
+      .catch((response) => {
+        console.log(response)
+        return response
       });
   }
   static getPlug(id) {
@@ -136,7 +137,6 @@ class PlugService {
         const requestUrl = `${url}${"savedplugs/"}${id}`;
         const res = await axios.get(requestUrl);
         const data = res.data;
-        console.log(data)
         resolve(data);
       } catch (err) {
         reject(err);
@@ -157,7 +157,7 @@ class PlugService {
         return response;
       })
       .catch(err => {
-        console.log("Cannot log in", err);
+        return err
       });
   }
   static logout() {
@@ -165,10 +165,10 @@ class PlugService {
     return axios
       .get(requestUrl)
       .then(response => {
-        console.log(response);
+        return response
       })
       .catch(err => {
-        console.log(err)
+        return err
       });
   }
   static register(formData) {
@@ -181,10 +181,10 @@ class PlugService {
       headers: { "Content-Type": "application/x-www-form-urlencoded" }
     })
       .then(response => {
-        console.log(response);
+        return response
       })
       .catch(err => {
-        console.log("Cannot register because:", err);
+        return err
       });
   }
   static checkLogin() {
@@ -196,7 +196,7 @@ class PlugService {
     }).then(response => {
       return response
     }).catch(err => {
-      console.log(err)
+      return err
     })
   }
 
@@ -209,7 +209,7 @@ class PlugService {
     }).then(response => {
       return response
     }).catch(err => {
-      console.log(err)
+      return err
     })
   }
 
@@ -219,7 +219,6 @@ class PlugService {
         const requestUrl = `${url}${"user"}`;
         const res = axios.get(requestUrl)
         const data = res.data
-        console.log(data)
         resolve(data)
       } catch(err) {
         reject(err)
@@ -236,7 +235,6 @@ class PlugService {
         const requestUrl = `${url}${"user"}`;
         const res = await axios.get(requestUrl);
         const data = res.data;
-        console.log(res, data, requestUrl);
         resolve(data);
       } catch (err) {
         reject(err);

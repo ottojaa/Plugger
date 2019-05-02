@@ -83,23 +83,37 @@ exports.get_all_Posts = () => {
     });
 };
 
-exports.uploadSingle = (req, res) => {
-  createThumbnails(req.file.path, req.file.originalname);
-  const Post = new Post({
-    time: moment(),
+exports.upload_single_plug = (data) => {
+  /* const post = new Post({
+    createdAt: moment(),
     title: req.body.title,
-    path: req.file.path,
+    plug: req.file.path,
     category: req.body.category,
     details: req.body.details,
-    fileName: req.file.originalname
-  });
-  Post.save().then(() => {
-    PostController.find_all_posts()
-      .then(post => {
-        res.send(post);
-      })
-      .catch(err => {
-        console.log("Failed to upload because:", err);
-      });
-  });
-};
+    fileName: req.file.originalname,
+    owner: req.body.owner,
+    phone: req.body.phone,
+    location: req.body.location,
+    email: req.body.email,
+    username: req.body.username,
+    firstname: req.body.firstname,
+    lastname: req.body.lastname
+  }); */
+  const post = new Post(data);
+  console.log(post)
+  return post.save()
+    .then(() => {
+      return Post.find({})
+        .then(post => {
+          console.log(post);
+          return post;
+        })
+        .catch(err => {
+          console.log(err);
+          return err;
+        });
+    }).catch(err => {
+      return res.send({ error: 'Failed to upload because', err })
+    })
+
+}; 

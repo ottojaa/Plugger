@@ -2,16 +2,32 @@
   <div id="app">
     <v-app id="inspire">
       <v-content>
-        <v-container fluid fill-height>
-          <v-layout align-center justify-center>
-            <v-flex xs12 sm8 md4>
+        <v-container
+          fluid
+          fill-height
+        >
+          <v-layout
+            align-center
+            justify-center
+          >
+            <v-flex
+              xs12
+              sm8
+              md4
+            >
               <v-card class="elevation-12">
-                <v-toolbar dark color="primary">
+                <v-toolbar
+                  dark
+                  color="primary"
+                >
                   <v-toolbar-title>Login form</v-toolbar-title>
                   <v-spacer></v-spacer>
                 </v-toolbar>
                 <v-card-text>
-                  <v-form ref="form" id="form">
+                  <v-form
+                    ref="form"
+                    id="form"
+                  >
                     <v-text-field
                       prepend-icon="person"
                       v-model="username"
@@ -32,8 +48,15 @@
                       {{ statusMessage }}
                     </div>
                     <div class="center">
-                      <v-btn color="primary" @click="login">Login</v-btn>
-                      <v-btn class="button" color="pink" @click="$router.push('/register')">Register</v-btn>
+                      <v-btn
+                        color="primary"
+                        @click="login"
+                      >Login</v-btn>
+                      <v-btn
+                        class="button"
+                        color="pink"
+                        @click="$router.push('/register')"
+                      >Register</v-btn>
                     </div>
                   </v-form>
                 </v-card-text>
@@ -70,20 +93,33 @@ export default {
       formData.append("password", this.password);
       const query = serialize(form);
       PlugService.login(query)
-        .then((res) => {
+        .then(res => {
           PlugService.user = res;
           if (res.data.error) {
-             this.statusMessage = res.data.error
+            this.statusMessage = res.data.error;
           } else {
             this.$router.push("/");
           }
-         
         })
         .catch(err => {
           console.log(err);
         });
+    },
+    async updated() {
+      try {
+        this.user = await PlugService.getUser();
+      } catch (err) {
+        this.error = err.message;
+      } finally {
+        console.log(this.user);
+        if (this.user) {
+          PlugService.user = this.user;
+          this.$router.push("/");
+        } else {
+          this.statusMessage = "Please enter your credentials";
+        }
+      }
     }
-    
   }
 };
 </script>

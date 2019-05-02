@@ -1,14 +1,11 @@
 const express = require("express");
 const moment = require("moment");
 const Post = require("../models/plug.js");
-const User = require('../controllers/userController')
-const PostController = require("../controllers/PostController");
-const UserController = require('../controllers/userController');
-const ObjectId = require('mongodb').ObjectId;
+const User = require("../models/user.js");
+const PostController = require("../controllers/postcontroller.js");
 const router = express.Router();
 const passport = require('passport')
 const multer = require("multer");
-const sharp = require("sharp");
 
 const storage = multer.diskStorage({
   // Defines the destination for files
@@ -30,14 +27,13 @@ const upload = multer({
 
 //------------ Routes ------------//
 router.get("/", (req, res) => {
-  res.send("toimi");
+  res.send("Api toimii");
 });
 router.get("/upload", (req, res) => {
   res.send("toimis");
 });
 
 router.post("/", upload.single("plug"), async (req, res) => {
-  console.log(req.body)
   const post = new Post({
     createdAt: moment(),
     title: req.body.title,
@@ -53,20 +49,18 @@ router.post("/", upload.single("plug"), async (req, res) => {
     firstname: req.body.firstname,
     lastname: req.body.lastname
   });
-  await post
-    .save()
-    .then(() => {
-      PostController.find_all_posts()
-        .then(post => {
-          res.send(post);
-        })
-        .catch(err => {
-          res.send("Failed to upload because:", err); // to json
-        });
-    })
-    .catch(err => {
-      res.send(err);
-    });
+  if (!req.body || !req.file) {
+    return res.send({ error: 'Could not upload your plug. Please fill all fields correctly' });
+  } else {
+    await post
+      .save()
+      .then(() => {
+        return res.send({ status: 'Uploaded succesfully' })
+      })
+      .catch(err => {
+        return res.send({ error: err });
+      });
+  }
 });
 
 router.get("/gallery", async (req, res) => {
@@ -75,7 +69,7 @@ router.get("/gallery", async (req, res) => {
       res.send(post);
     })
     .catch(err => {
-      console.log(err);
+      res.send({ error: 'Could not find any posts', err })
     });
 });
 
@@ -87,17 +81,15 @@ router.get("/posts", async (req, res) => {
 
 router.get('/myPlugs/:id', async (req, res) => {
   const searchTerm = req.params.id
-  console.log(searchTerm);
   await PostController.find_by_owner(searchTerm)
-    .then((post) => {
+    .then(post => {
       res.send(post)
     }).catch(err => {
-      console.log(err);
+      res.send({ error: 'Could not find plugs for this user' })
     })
 })
 
 router.post("/gallery/:id", upload.single("Post"), (req, res) => {
-  console.log(req.body)
   const updatedPost = {
     title: req.body.title,
     details: req.body.details,
@@ -107,25 +99,28 @@ router.post("/gallery/:id", upload.single("Post"), (req, res) => {
   };
   Post.findByIdAndUpdate({ _id: req.params.id }, { $set: updatedPost })
     .then(() => {
-      res.send({success: 'Succesfully updated.'})
+      res.send({ success: 'Succesfully updated.' })
     }).catch((err) => {
-      res.send({error: err})
+      res.send({ error: err })
     });
 });
 
 router.post('/plug/:id', (req, res) => {
   Post.findOneAndUpdate({ _id: req.body.plugId }, { $push: { pluggers: req.body.userId } })
-  .then(() => {
-    res.send({success: 'Succesfully added to your plugs'})
-  }).catch((err) => {
-    res.send({error: err})
-  });
+    .then(() => {
+      res.send({ success: 'Succesfully added to your plugs' })
+    }).catch((err) => {
+      res.send({ error: err })
+    });
 })
 
 router.get('/savedplugs/:id', (req, res) => {
-  PostController.find_my_plugs({pluggers: { "$in": [req.params.id]}}).then((post) => {
-    res.send(post);
-  })
+  PostController.find_my_plugs({ pluggers: { "$in": [req.params.id] } })
+    .then((post) => {
+      res.send(post);
+    }).catch(err => {
+      res.send({ error: 'Could not find plugs for this user because', err })
+    })
 })
 
 router.delete("/gallery/:id", (req, res) => {
@@ -135,7 +130,7 @@ router.delete("/gallery/:id", (req, res) => {
         res.send(post);
       })
       .catch(err => {
-        console.log(err);
+        res.send({ error: 'Could not delete because', err })
       });
   });
 });
@@ -163,6 +158,8 @@ router.get("/search/:searchterm", (req, res) => {
       .catch(err => {
         console.log(err);
       });
+  } else {
+    res.send({ error: 'Search failed' })
   }
 });
 
@@ -204,15 +201,20 @@ router.post("/register", (req, res) => {
       email: req.body.email,
       password: req.body.password,
       firstname: req.body.firstname,
-      lastname: req.body.lastname
+      lastname: req.body.lastname,
+      phone: req.body.phone,
+      location: req.body.location
     });
 
-    User.createUser(newUser, function (err, user) {
-      if (err) throw err;
-      res.send(user).end()
+    User.createUser(newUser, (err, user) => {
+      if (err) {
+        res.send({ error: 'Could not complete registration' })
+      } else {
+        res.send(user).end()
+      }
     });
   } else {
-    res.status(500).send("{errors: \"Passwords don't match\"}").end()
+    res.send({error: 'Passwords did not match.'})
   }
 });
 
