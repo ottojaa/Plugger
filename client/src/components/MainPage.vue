@@ -17,7 +17,7 @@
             class="white--text"
             required
           ></v-text-field>
-          <v-btn @click="validate">submit</v-btn>
+          <v-btn @click="validate">Search</v-btn>
         </v-form>
       </v-card-title>
     </v-card>
@@ -250,7 +250,7 @@ export default {
 .center {
   justify-content: center;
 }
-.v-text-field__slot{
+.v-text-field__slot {
   color: white;
 }
 </style>

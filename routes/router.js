@@ -166,11 +166,11 @@ router.get("/search/:searchterm", (req, res) => {
 //------------- Register - Login - User -------------//
 
 router.post("/authenticate", (req, res, next) => {
+  console.log(req.body)
   passport.authenticate('local', (err, user, info) => {
     if (err) { return next(err) }
     if (!user) {
-      console.log(user)
-      return res.send({ error: "Invalid login credentials" })
+      return res.send({ error: "Invalid login credentials"})
     }
     req.logIn(user, function (err) {
       if (err) { return next(err); }

@@ -63,6 +63,27 @@
                     label="Last Name"
                     required
                   ></v-text-field>
+
+                  <v-text-field
+                    prepend-icon="phone"
+                    v-model="phone"
+                    :rules="rules"
+                    ref="phone"
+                    name="phone"
+                    type="number"
+                    label="Phone Number"
+                    required
+                  ></v-text-field>
+                  <v-text-field
+                    prepend-icon="location_on"
+                    v-model="location"
+                    :rules="rules"
+                    ref="location"
+                    name="location"
+                    type="text"
+                    label="Location"
+                    required
+                  ></v-text-field>
                   <v-text-field
                     prepend-icon="lock"
                     v-model="password"
@@ -81,26 +102,6 @@
                     name="passwordAgain"
                     type="password"
                     label="Type password again"
-                    required
-                  ></v-text-field>
-                  <v-text-field
-                    prepend-icon="phone"
-                    v-model="phone"
-                    :rules="rules"
-                    ref="phone"
-                    name="phone"
-                    type="number"
-                    label="Phone Number"
-                    required
-                  ></v-text-field>
-                  <v-text-field
-                    prepend-icon="location"
-                    v-model="location"
-                    :rules="rules"
-                    ref="location"
-                    name="location"
-                    type="text"
-                    label="Location"
                     required
                   ></v-text-field>
                   <v-spacer></v-spacer>
@@ -138,7 +139,6 @@
 /* eslint-disable */
 
 import PlugService from "../PlugService.js";
-import router from "../routes.js";
 const serialize = require("form-serialize");
 export default {
   data() {
@@ -174,7 +174,23 @@ export default {
           if (user.data.error) {
             this.error = user.data.error;
           } else {
-            console.log(user);
+            let userData = "username=" + this.username + "&password=" + this.password
+            PlugService.login(userData)
+              .then(res => {
+                PlugService.user = res;
+                console.log(res);
+                if (res.data.error) {
+                  this.error = res.data.error;
+                } else {
+                  this.$router.push({
+                    name: 'main',
+                    params: {status: 'Registered succesfully!'}
+                  });
+                }
+              })
+              .catch(err => {
+                console.log(err);
+              });
           }
         })
         .catch(err => {

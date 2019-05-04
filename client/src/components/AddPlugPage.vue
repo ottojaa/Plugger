@@ -40,7 +40,7 @@
           v-if="!imagePreview"
           color="primary"
           @click="$refs.plug.click()"
-        >Choose Banner Image</v-btn>
+        >Choose Plug Banner</v-btn>
         <input
           v-show="false"
           id="plug"
@@ -178,7 +178,7 @@ export default {
         this.lastname = this.user.lastname;
         console.log(this.username);
       } else {
-        this.$router.push("/login");
+        /* this.$router.push("/login"); */
       }
     }
   }

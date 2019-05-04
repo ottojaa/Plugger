@@ -1,6 +1,14 @@
 <template>
-<div class="container">
-<v-layout justify-center row wrap fill-height>
+  <div
+    class="container"
+    v-if="noPlugs"
+  >
+    <v-layout
+      justify-center
+      row
+      wrap
+      fill-height
+    >
       <v-flex
         xs2
         sm3
@@ -11,9 +19,15 @@
         v-bind:index="index"
         v-bind:key="plug._id"
       >
-        <v-card class="ma-2" hover:true>
-          <v-img v-bind:src="'https:/localhost:3000/' + plug.fileName" aspect-ratio="2.75"></v-img>
-          <v-card-title primary-title >
+        <v-card
+          class="ma-2"
+          hover:true
+        >
+          <v-img
+            v-bind:src="'https://pluggerexpress.herokuapp.com/' + plug.fileName"
+            aspect-ratio="2.75"
+          ></v-img>
+          <v-card-title primary-title>
             <div>
               <h3 class="headline mb-0 background">{{plug.title}}</h3>
               <div>{{plug.details}}</div>
@@ -21,14 +35,15 @@
           </v-card-title>
 
           <v-card-actions>
-            <v-btn flat color="purple" @click="getId(index)">View Plug</v-btn>
+            <v-btn
+              flat
+              color="purple"
+              @click="getId(index)"
+            >View Plug</v-btn>
             <v-spacer></v-spacer>
           </v-card-actions>
-          <v-expansion-panel
-            expand
-          >
-            <v-expansion-panel-content
-            >
+          <v-expansion-panel expand>
+            <v-expansion-panel-content>
               <template v-slot:header>
                 <div>Plug Views</div>
               </template>
@@ -41,8 +56,19 @@
         <v-spacer></v-spacer>
       </v-flex>
     </v-layout>
+  </div>
+  <v-layout
+    v-else
+    justify-center
+    row
+    wrap
+    fill-height
+  >
+    <div>
+      <h1>You have not posted any plugs yet!</h1>
     </div>
- </template>
+  </v-layout>
+</template>
  <script>
 /* eslint-disable */
 import PlugService from "../PlugService.js";
@@ -54,14 +80,15 @@ export default {
   data() {
     return {
       plug: "",
-      user: '',
+      user: "",
       plugs: [],
       items: ["Graphics Design", "Art", "Music", "Programming"],
       title: "",
       category: "",
       details: "",
       isEditing: false,
-      currentUser: ''
+      currentUser: "",
+      noPlugs: true
     };
   },
 
@@ -75,8 +102,8 @@ export default {
     },
     delete(index) {
       this.plugId = this.plugs[index]._id;
-      PlugService.deletePlug(this.plugId)
-      console.log(this.plugs)
+      PlugService.deletePlug(this.plugId);
+      console.log(this.plugs);
     }
   },
   components: {
@@ -84,17 +111,21 @@ export default {
   },
 
   async created() {
-    
     try {
-      this.user = await PlugService.getUser()
+      this.user = await PlugService.getUser();
     } catch (err) {
       this.error = err.message;
     } finally {
-      if (this.user){
+      if (this.user) {
         this.plugs = await PlugService.myPlugs(this.user.username);
-        PlugService.user = this.user
-      }else{
-        this.$router.push('/login')
+        PlugService.user = this.user;
+        if (this.plugs.length === 0) {
+          this.noPlugs = false;
+        } else {
+          this.noPlugs = true;
+        }
+      } else {
+        /* this.$router.push("/login"); */
       }
     }
   }

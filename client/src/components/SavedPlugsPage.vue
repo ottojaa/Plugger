@@ -61,7 +61,7 @@
     fill-height
   >
     <div>
-      <h1>No saved plugs available</h1>
+      <h1>No saved plugs found</h1>
     </div>
   </v-layout>
 </template>
@@ -124,7 +124,7 @@ export default {
     "upload-btn": UploadButton
   },
 
-  async mounted() {
+  async created() {
     try {
       this.user = await PlugService.getUser();
     } catch (err) {
@@ -140,7 +140,7 @@ export default {
         }
         this.titles = await PlugService.getTitles();
       } else {
-        this.$router.push("/login");
+        /* this.$router.push("/login"); */
       }
     }
   }

@@ -2,7 +2,7 @@
   <v-layout row>
     <v-flex xs12 sm6 offset-sm3>
       <v-card>
-        <v-img v-bind:src="'https:/localhost:3000/' + plug.fileName"    height="300px">
+        <v-img v-bind:src="'https://pluggerexpress.herokuapp.com/' + plug.fileName"    height="300px">
           <v-layout column fill-height>
             <v-card-title>
               <v-btn dark icon @click="gallery">
@@ -127,6 +127,15 @@
           <v-btn @click="savePlug" color="success">Accept plug</v-btn>
         </div>
       </v-card>
+      <v-alert
+      v-if="status"
+      :value="true"
+      type="success"
+      dismissible
+      transition="scale-transition"
+    >
+      Added to your plugs succesfully!
+    </v-alert>
     </v-flex>
   </v-layout>
 </template>
@@ -149,7 +158,8 @@ export default {
       phone: '',
       location: '',
       email: '',
-      plugId: ''
+      plugId: '',
+      status: false
     };
   },
   methods: {
@@ -179,7 +189,7 @@ export default {
     },
     savePlug() {
       PlugService.addToMyPlugs(this.user._id, this.$route.query.plugId).then(() => {
-        console.log('heijaa')
+        this.status = true
       })
     }
   },
@@ -204,7 +214,7 @@ export default {
           this.ownedByCurrentUser = true
         }
       }else{
-        this.$router.push('/login')
+        /* this.$router.push('/login') */
       }
       
       

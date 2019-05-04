@@ -109,6 +109,24 @@ export default {
     pushTo(location) {
       this.$router.push(location);
     },
+    async checkLogin() {
+      if (this.$route.name !== "register" || this.$route.name === 'login') {
+        try {
+          this.user = await PlugService.getUser();
+        } catch (err) {
+          this.error = err.message;
+        } finally {
+          PlugService.user = this.user;
+          if (this.user) {
+            PlugService.user = this.user;
+            this.showNavbar = true;
+          } else {
+            this.showNavbar = false;
+            this.$router.push("/login");
+          }
+        }
+      } 
+    },
     async logOut() {
       await PlugService.logout().then(() => {
         this.$router.push("/login");
@@ -116,27 +134,10 @@ export default {
     }
   },
   async created() {
-    try {
-      this.user = await PlugService.getUser();
-    } catch (err) {
-      this.error = err.message;
-    } finally {
-      console.log(this.user);
-      PlugService.user = this.user;
-    }
+    this.checkLogin();
   },
   async updated() {
-    try {
-      this.user = await PlugService.getUser();
-    } catch (err) {
-      this.error = err.message;
-    } finally {
-      if (this.user) {
-        console.log(this.user)
-        PlugService.user = this.user;
-        this.showNavbar = true;
-      }
-    }
+    this.checkLogin();
   }
 };
 </script>

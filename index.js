@@ -58,7 +58,7 @@ passport.use(
 );
 
 app.use(function (req, res, next) {
-  res.setHeader("Access-Control-Allow-Origin", 'http://localhost:8080');
+  res.setHeader("Access-Control-Allow-Origin", 'https://users.metropolia.fi');
   res.setHeader('Access-Control-Allow-Methods', 'DELETE, PUT');
   res.setHeader('Access-Control-Allow-Credentials', 'true')
   res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
@@ -70,7 +70,7 @@ app.use(function (req, res, next) {
   }
 }); 
 const corsOptions = {
-  origin: 'http://localhost:8080'
+  origin: 'https://users.metropolia.fi'
 }
 app.use(helmet());
 app.use(cors(corsOptions));
