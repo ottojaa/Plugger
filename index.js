@@ -5,6 +5,7 @@ const mongoose = require("mongoose");
 const path = require("path");
 const cors = require("cors");
 const router = require("./routes/router");
+const user = require("./routes/user");
 const expressSession = require("express-session");
 const cookieParser = require("cookie-parser");
 const passport = require("passport");
@@ -94,3 +95,4 @@ mongoose
 });
 
 app.use("/", router);
+app.use("/", user);

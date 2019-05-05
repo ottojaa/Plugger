@@ -14,7 +14,6 @@ exports.Post_search_by_category = (searchTerm, searchCategory) => {
 };
 
 exports.Post_search_all = searchTerm => {
-  console.log(searchTerm);
   return Post.find(
     { $text: { $search: searchTerm } },
     { score: { $meta: "textScore" } }
@@ -83,8 +82,8 @@ exports.get_all_Posts = () => {
     });
 };
 
-exports.upload_single_plug = (data) => {
-  /* const post = new Post({
+exports.upload_single_plug = (req, res) => {
+  const post = new Post({
     createdAt: moment(),
     title: req.body.title,
     plug: req.file.path,
@@ -98,22 +97,17 @@ exports.upload_single_plug = (data) => {
     username: req.body.username,
     firstname: req.body.firstname,
     lastname: req.body.lastname
-  }); */
-  const post = new Post(data);
-  console.log(post)
-  return post.save()
-    .then(() => {
-      return Post.find({})
-        .then(post => {
-          console.log(post);
-          return post;
-        })
-        .catch(err => {
-          console.log(err);
-          return err;
-        });
-    }).catch(err => {
-      return res.send({ error: 'Failed to upload because', err })
-    })
-
+  });
+  if (!req.body || !req.file) {
+    return res.send({ error: 'Could not upload your plug. Please fill all fields correctly' });
+  } else {
+    await post
+      .save()
+      .then(() => {
+        return { status: 'Uploaded succesfully' }
+      })
+      .catch(err => {
+        return { error: err };
+      });
+  }
 }; 

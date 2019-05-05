@@ -1,6 +1,7 @@
 const User = require("../models/user");
 const moment = require('moment');
 const bcrypt = require('bcryptjs')
+const passport = require('passport')
 
 exports.createUser = (newUser, callback) => {
     bcrypt.genSalt(10, function (err, salt) {
@@ -24,4 +25,25 @@ exports.comparePassword = (candidatePassword, hash, callback) => {
         if (err) throw err;
         callback(null, isMatch);
     });
+}
+exports.destroySession = (req) => {
+    req.session.destroy(function (err) {
+        res.clearCookie('connect.sid');
+        req.logout();
+        res.send('Logged out succesfully')
+    }).catch((err) => {
+        res.send({error: err})
+    });
+}
+exports.authenticate = (req) => {
+    passport.authenticate('local', (err, user, info) => {
+        if (err) { return next(err) }
+        if (!user) {
+            return res.send({ error: "Invalid login credentials" })
+        }
+        req.logIn(user, function (err) {
+            if (err) { return next(err); }
+            return res.send(user)
+        });
+    })
 }

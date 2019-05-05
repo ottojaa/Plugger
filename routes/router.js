@@ -29,38 +29,11 @@ const upload = multer({
 router.get("/", (req, res) => {
   res.send("Api toimii");
 });
-router.get("/upload", (req, res) => {
-  res.send("toimis");
-});
 
 router.post("/", upload.single("plug"), async (req, res) => {
-  const post = new Post({
-    createdAt: moment(),
-    title: req.body.title,
-    plug: req.file.path,
-    category: req.body.category,
-    details: req.body.details,
-    fileName: req.file.originalname,
-    owner: req.body.owner,
-    phone: req.body.phone,
-    location: req.body.location,
-    email: req.body.email,
-    username: req.body.username,
-    firstname: req.body.firstname,
-    lastname: req.body.lastname
-  });
-  if (!req.body || !req.file) {
-    return res.send({ error: 'Could not upload your plug. Please fill all fields correctly' });
-  } else {
-    await post
-      .save()
-      .then(() => {
-        return res.send({ status: 'Uploaded succesfully' })
-      })
-      .catch(err => {
-        return res.send({ error: err });
-      });
-  }
+   PostController.upload_single_plug(req, res).then((response) => {
+     res.send(response);
+   })
 });
 
 router.get("/gallery", async (req, res) => {
@@ -160,61 +133,6 @@ router.get("/search/:searchterm", (req, res) => {
       });
   } else {
     res.send({ error: 'Search failed' })
-  }
-});
-
-//------------- Register - Login - User -------------//
-
-router.post("/authenticate", (req, res, next) => {
-  console.log(req.body)
-  passport.authenticate('local', (err, user, info) => {
-    if (err) { return next(err) }
-    if (!user) {
-      return res.send({ error: "Invalid login credentials"})
-    }
-    req.logIn(user, function (err) {
-      if (err) { return next(err); }
-      return res.send(user)
-    });
-  })(req, res, next);
-});
-
-router.get('/logout', function (req, res) {
-  req.session.destroy(function (err) {
-    res.clearCookie('connect.sid');
-    req.logout();
-    res.send('Logged out succesfully')
-  });
-});
-
-router.get('/user', (req, res) => {
-  res.send(req.user)
-});
-
-router.post("/register", (req, res) => {
-  const password = req.body.password;
-  const passwordAgain = req.body.passwordAgain;
-
-  if (password == passwordAgain) {
-    const newUser = new User({
-      username: req.body.username,
-      email: req.body.email,
-      password: req.body.password,
-      firstname: req.body.firstname,
-      lastname: req.body.lastname,
-      phone: req.body.phone,
-      location: req.body.location
-    });
-
-    User.createUser(newUser, (err, user) => {
-      if (err) {
-        res.send({ error: 'Could not complete registration' })
-      } else {
-        res.send(user).end()
-      }
-    });
-  } else {
-    res.send({error: 'Passwords did not match.'})
   }
 });
 

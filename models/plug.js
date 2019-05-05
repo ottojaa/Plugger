@@ -61,6 +61,6 @@ Post.ensureIndexes(function (err) {
     if (err) console.log(err)
 })
 Post.on('index', function (err) {
-    if (err) console.error(err); // error occurred during index creation
+    if (err) console.error(err); 
   })
 module.exports = mongoose.model('Post', postSchema);
